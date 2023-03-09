@@ -1,8 +1,7 @@
-# GESI Open Source Project
+# GESI_DE 
 
 ## Introduction
-Gesi Model is designed for modeling electricity demand and power generation in Republic of Korea, in order to estimate the proper number of additional renewable energy production facility while gradually decreasing classic
-power plants. <br>
+<-----> <br>
 <br>
 This project is powered by Green Energy Strategy Institute(GESI) and (c) Entropy Paradox<br>
 
