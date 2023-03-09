@@ -1,18 +1,13 @@
 # GESI_DE 
 
 ## Introduction
-<-----> <br>
+----- <br>
 <br>
-This project is powered by Green Energy Strategy Institute(GESI) and (c) Entropy Paradox<br>
+This project is powered by Green Energy Strategy Institute(GESI) <br>
 
 ## Package Structure
-`data/` : Contains Sector_coupling_data_2_XXXX.xlsx datasets<br>
-`data_preprocessing/`: Constains data preprocessors. Not directly used.<br>
 `examples/`: Contains example codes for running Gesi Model<br>
-`gams_original/`: Direct conversion from gams to pyomo<br>
 `gesi_model/`: Main source directory for Gesi Model Project <br>
-`multiple_models/`: Another way of implementation for pre-made multiple model<br>
-`notebook/`: Miscellaneous notebook file used for brainstorming and testing during implementing gesi model<br>
 
 ## Setting up Environment
 - Create Virtual Environment
@@ -42,7 +37,7 @@ $ conda install pandas openpyxl jupyter
 ```
 
 ## Running Gesi Model
-It is possible to look up example code for running default Gesi Model using Sector_coupling_data_2_gesi.xlsx data in `examples/` directory.<br>
+It is possible to look up example code for running default Gesi Model using GESI_DE.xlsx data in `examples/` directory.<br>
 The code below is `examples/gesi.py`.
 
 ```
@@ -60,8 +55,7 @@ sys.path.append(web_model_dir)
 
 from gesi_model_web.run import ModelExecutor
 
-data_path = 'Sector_coupling_data_2_web_custom_v3.xlsx'
-# data_path = "../data/web/data/Sector_coupling_data_2_web_v4.xlsx"
+data_path = 'GESI_DE.xlsx'
 name = 'gesi_web_jupyter'
 
 executor = ModelExecutor(data_path, name=name, save_result=True, solver='cplex', verbose=1)
