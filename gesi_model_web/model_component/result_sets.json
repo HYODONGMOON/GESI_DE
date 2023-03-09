@@ -1,15 +1,12 @@
 {
     "representation": [
         "el_demand",
-        "Nuke",
         "WT",
         "PV",
-        "other",
+        "Waste",
         "PP",
         "CHP",
         "Fcell",
-        "NG_PP",
-        "coal_PP",
         "battery_out",
         "pumped_out",
         "P2H",
@@ -19,16 +16,19 @@
         "DH_Boiler",
         "EV",
         "electrolysis",
+        "SMR",
+        "National_Grid_in",
+        "National_Grid_out",
         "curtail",
         "pumped_soc",
         "battery_soc",
         "LNG",
-        "coal_consumption",
         "NG_consumption"
     ],
     "H_representation": [
         "heat_demand",
         "CHP_h",
+        "Waste_h",
         "Fcell_h",
         "DH_HP_h",
         "DH_Boiler",
@@ -50,10 +50,6 @@
     ],
     "digits": [
         "em_power",
-        "em_heat_r",
-        "em_heat_c",
-        "em_tr",
-        "em_ind",
         "curtailment",
         "RE_share_p"
     ],

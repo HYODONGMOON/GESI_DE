@@ -51,7 +51,6 @@ def init_six(M, t):
     else:
         return t // 6. + 1
 
-
 def init_sum_demand(M):
     return sum(M.Distributions[(t, 'Demand')] for t in M.t)
 
@@ -116,10 +115,6 @@ def init_annuity(M, f_tech):
     return value(M.discount) * M.cost[(f_tech, 'invest')] / (1 - (1 + value(M.discount)) ** (-M.cost[(f_tech, 'life')]))
 
 
-def init_annuity_NG(M):
-    return value(M.discount) * value(M.inv_NG) / (1 - (1 + value(M.discount)) ** (- M.life_NG))
-
-
 def init_annuity_coal(M):
     return value(M.discount) * value(M.inv_coal) / (1 - (1 + value(M.discount)) ** (- M.life_coal))
 
@@ -136,21 +131,6 @@ def init_hourly_capacity_EV(M, t):
     return value(M.ch_cap) * value(M.C_share) * ((1 - value(M.M_share)) + value(M.M_share) * (1 - M.Distributions[(t, 'T_demand')] / value(M.max_tr_distribution)))
 
 
-def init_nuke_P(M, t):
-    return 0.8 * M.specs[('Nuke', 'cap')] * M.Distributions[(t, 'constant')]
-
 
 def init_industry_gas(M, t):
     return value(M.gas_D) * 1000000. / 8760.
-
-
-def init_E_heat_fixed(M, t):
-    return (value(M.el_h_new) + value(M.el_h_old)) * 1000000 * (1 - value(M.smart_share)) * M.h_H_demand[t] * 3
-
-
-def init_E_heat_smart(M, t):
-    return (value(M.el_h_new) + value(M.el_h_old)) * 1000000 * value(M.smart_share) * M.h_H_demand[t] * 3
-
-
-def init_Stor_H_ind(M):
-    return sum(M.E_heat_smart[t] for t in M.t) * 12. / 8760.

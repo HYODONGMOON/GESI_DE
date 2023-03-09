@@ -125,11 +125,6 @@ if __name__ == '__main__':
 
     name = 'gesi_web'
 
-    # data_path = "../data/web/data/2030_0.4_1_9_0.5_0.1_강.xlsx"
-    # data_path = "../data/web/data/2050_1_9_0.5_강.xlsx"
-    # executor = ModelExecutor(data_path, name=name, save_result=True, solver='cplex', verbose=1)
-    # executor.run_once()
-
     data_path = "../data/web/run_batch/2050_v4"
     executor = ModelExecutor(data_path, name=name, save_result=True, solver='cplex', verbose=0)
     executor.run()

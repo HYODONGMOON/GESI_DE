@@ -42,22 +42,11 @@ class Configuration:
             raise TypeError('non-negative integer is expected, {} is given instead'.format(type(self.verbose)))
 
         self.years = [2025,2030,2035,2040,2045,2050]
-        # self.NDC = [0.35, 0.4, 0.45, 0.5]
-        # self.ratio_PV = [i for i in range(1, 10)]
-        # self.building_retrofit_rates = [0.5, 1.0, 1.5, 2.0]
-        # self.BEVs_shares = [0.1, 0.15, 0.2, 0.25]
-        # self.industry_decarbonization_levels = ['약', '중', '강']
-
-        # self.industry_decarbonization_map = {
-        #     'low': '약',
-        #     'middle': '중',
-        #     'high': '강'
-        # }
 
         self.year = None
         self.ndc = None
-        self.ratio_pv = None
-        self.ratio_wt = None
+        # self.ratio_pv = None
+        # self.ratio_wt = None
         self.building_retrofit_rate = None
         self.BEVs_share = None
         self.industry_decarbonization = None
@@ -65,46 +54,9 @@ class Configuration:
     def load_control(self, **kwargs):
         self.year = kwargs.pop('year', 0)
         self.ndc = kwargs.pop('ndc', 0)
-        self.ratio_pv = kwargs.pop('ratio_pv', 0)
-        self.ratio_wt = kwargs.pop('ratio_wt', 0)
-        self.ratio_WT_off = kwargs.pop('ratio_wt_off', 0)
+        # self.ratio_pv = kwargs.pop('ratio_pv', 0)
+        # self.ratio_wt = kwargs.pop('ratio_wt', 0)
+        # self.ratio_WT_off = kwargs.pop('ratio_wt_off', 0)
         self.hydrogen_import_share = kwargs.pop('hydrogen_import_share',0)
+        self.electricity_import_share = kwargs.pop('electricity_import_share',0)
 
-
-        # Check invalid keyword argument
-        # if len(kwargs) > 0:
-            # raise KeyError('{} is invalid keyword argument'.format(next(iter(kwargs))))
-
-        # if self.year not in self.years:
-            # raise ValueError('year must be 2030 or 2050'.format(self.year))
-
-        # if self.ratio_pv not in self.ratio_PV:
-            # raise ValueError('Invalid ratio_pv value: {}, expected: {}'.format(self.ratio_pv, self.ratio_PV))
-
-        # if self.ratio_wt not in self.ratio_PV:
-            # raise ValueError('Invalid ratio_wt value: {}, expected: {}'.format(self.ratio_wt, self.ratio_PV))
-
-        # if self.ratio_pv + self.ratio_wt != 10:
-            # raise ValueError('year must be 2030 or 2050'.format(self.year))
-
-        # if self.building_retrofit_rate not in self.building_retrofit_rates:
-            # raise ValueError(
-                # 'Invalid building retrofit rate value: {}, expected: {}'.format(self.building_retrofit_rate,
-                                                                                # self.building_retrofit_rates))
-
-        # if self.industry_decarbonization not in self.industry_decarbonization_levels:
-            # raise ValueError(
-                # 'Invalid industry decarbonization level: {}, expected: {}'.format(self.industry_decarbonization,
-                                                                                  # self.industry_decarbonization_levels))
-
-        # if self.year < 2035:
-            # if self.ndc not in self.NDC:
-                # raise ValueError('Invalid NDC value: {}, expected: {}'.format(self.ndc, self.NDC))
-
-            # if self.BEVs_share not in self.BEVs_shares:
-                # raise ValueError('Invalid BEVs_share value: {}, expected: {}'.format(self.BEVs_share, self.BEVs_shares))
-
-        # elif self.year == 2050:
-        #     self.solver_options['mip strategy subalgorithm'] = 1
-        #     self.solver_options['mip tolerances absmipgap'] = 0.05
-        #     self.solver_options['solver_io'] = 'mip'
