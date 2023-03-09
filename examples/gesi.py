@@ -17,3 +17,5 @@ name = 'gesi_web_jupyter'
 
 executor = ModelExecutor(data_path, name=name, save_result=True, solver='cplex', verbose=1)
 solver = executor.run_once()
+
+랄라라
