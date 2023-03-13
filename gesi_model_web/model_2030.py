@@ -42,6 +42,10 @@ def define_set(M):
     M.flexible_ex = Set(within=M.tech, doc='flexible technologies')
     M.flexible_stay = Set(within=M.tech, doc='flexible technologies stay')
     M.P2H = Set(within=M.tech, doc='power to heat technlogies')
+    M.P2G = Set(within=M.tech, doc='power to Hydrogen technlogies')
+    M.RH2 = Set(within=M.tech, doc='Hydrogen production by reforming')
+    M.G2G = Set(within=M.tech, doc='Hydrogen production from Hydrogen grid')
+
     M.thermal = Set(within=M.tech, doc='thermal technologies')
     M.mobile = Set(within=M.tech, doc='inputdata technologies')
     M.expand = Set(within=M.f_tech, doc='expandable technologies')
@@ -86,6 +90,7 @@ def define_parameter(M):
     M.Solidwaste_cap = Param(doc="constraints of Solidwaste amounts")
     M.Biogas_cap = Param(doc="constraints of Biogas amounts")    
     M.N_grid_cap = Param()
+    M.H_grid_cap = Param()
 
     # M.ratio_PV = Param()
     # M.ratio_WT = Param()
@@ -173,7 +178,7 @@ def define_variable(M):
     
     # M.gas = Var(M.t, M.tech, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
     M.gas = Var(M.t, M.gas_all, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
-    M.gasP = Var(M.t, within=NonNegativeReals, doc="gas production", initialize=0.0)
+    M.gasP = Var(M.t, M.tech, within=NonNegativeReals, doc="gas production", initialize=0.0)
     M.SOC_battery = Var(M.t, within=NonNegativeReals, initialize=0.0)
     M.New = Var(M.tech, within=NonNegativeReals, doc="new added capacity for expandable technologies", initialize=0.0)
     M.em = Var(within=NonNegativeReals, doc="emission amount (tCO2)", initialize=0.0)
@@ -198,7 +203,8 @@ def define_constraints(M):
     M.balance_gas = Constraint(M.t, rule=balance_gas_rule, doc="balancing gas demand and supply")
 
     # Conversion
-    M.gas_conversion = Constraint(M.t, rule=gas_conversion_rule, doc="hourly gas production eq")
+    M.gas_el_conversion = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule, doc="hydrogen converted from electricity")
+    M.gas_fuel_conversion = Constraint(M.t, M.RH2, rule=gas_fuel_conversion_rule, doc="hydrogen converted by reforming other sources")
     M.EL_conversion = Constraint(M.t, M.F2P, rule=EL_conversion_rule,
                                  doc="electricity conversion from dispatchable plant")
     M.EL_gas_conversion = Constraint(M.t, M.G2P, rule=EL_gas_conversion_rule,
@@ -304,6 +310,8 @@ def define_constraints(M):
     M.WtX_conversion_rule = Constraint(M.t, rule=WtX_conversion_rule)
     M.N_grid_rule = Constraint(M.t, rule=N_grid_rule)
     M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
+    M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
+    M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
 
   
   #  M.National_Grid_limit = Constraint(M.t, rule=National_Grid_limit_rule)

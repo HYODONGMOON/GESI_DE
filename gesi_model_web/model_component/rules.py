@@ -53,8 +53,15 @@ def heat_SOC_boundary_rule(M, t):
 
 
 # Gas Balance Equations
+# def balance_gas_rule(M, t):
+#    return (M.ch_gas[t] - M.dis_gas[t] + sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) - sum([M.gasP[(t, )]) == (- M.industry_gas[t]*(1-M.hydrogen_import_share))
+
 def balance_gas_rule(M, t):
-    return (M.ch_gas[t] - M.dis_gas[t] + sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) - M.gasP[t]) == (- M.industry_gas[t]*(1-M.hydrogen_import_share))
+    return (
+                   - sum([M.gasP[(t, RH2)] for RH2 in M.RH2])
+                   - sum([M.gasP[(t, P2G)] for P2G in M.P2G])
+                   - M.dis_gas[t]
+                   + M.ch_gas[t]) == - M.industry_gas[t]
 
 
 # Gas Storage Balance
@@ -81,13 +88,15 @@ def gas_discharge_constraint_rule(M, t):
 
 
 # Conversion
-def gas_conversion_rule(M, t):
-    # return M.gasP[t] == (M.specs[('electrolysis', 'eff_de')] * M.eld[(t, 'electrolysis')])
-    return (- (M.specs[('electrolysis', 'eff_de')] * M.eld[(t, 'electrolysis')]) - (M.specs[('SMR', 'eff_de')] * M.eld[(t, 'SMR')]) + M.gasP[t]) == 0
+def gas_el_conversion_rule(M, t, P2G):
+    return (M.gasP[(t, P2G)] - (M.specs[(P2G, 'eff_de')] * M.eld[(t, P2G)])) == 0
 
-# def Bio_conversion_rule(M, t):
-    # return 
+def gas_fuel_conversion_rule(M, t, RH2):
+    return (M.gasP[(t, RH2)] - (M.specs[(RH2, 'eff_de')] * M.eld[(t, RH2)])) == 0
 
+
+    
+  # return (- (M.specs[('electrolysis', 'eff_de')] * M.eld[(t, 'electrolysis')]) - (M.specs[('SMR', 'eff_de')] * M.eld[(t, 'SMR')]) + M.gasP[t]) == 0
 
 
 def EL_conversion_rule(M, t, F2P):
@@ -332,6 +341,12 @@ def N_grid_rule(M, t):
 
 def N_grid_rule1(M, t):
     return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
+
+def H_grid_rule(M, t):
+    return M.gasP[(t, 'H2_Grid')] == value(M.H_grid_cap)/8760
+
+def H_grid_rule1(M, t):
+    return M.gas[(t, 'H2_Grid')] <= value(M.H_grid_cap)/8760
 
 # National_Grid_in constraints
 # def National_Grid_limit_rule(M, t):

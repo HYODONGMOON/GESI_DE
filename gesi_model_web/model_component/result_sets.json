@@ -39,13 +39,16 @@
     ],
     "G_representation": [
         "gas_demand",
-        "gas_production",
+        "electrolysis",
+        "SMR",
         "CHP",
         "Fcell",
         "PP",
         "gas_charging",
         "gas_discharging",
         "gas_SOC",
+        "H2_grid_in",
+        "H2_grid_out",
         "LNG_consumption"
     ],
     "digits": [

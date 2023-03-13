@@ -389,12 +389,15 @@ class Reporter:
             graph_data[key] = dict()
 
         sum_gas_demand = 0
-        sum_gas_production = 0
+        sum_electrolysis = 0
+        sum_SMR = 0
         sum_chp = 0
         sum_fcell = 0
         sum_pp = 0
         sum_gas_charging = 0
         sum_gas_discharging = 0
+        sum_H2_grid_in = 0
+        sum_H2_grid_out = 0
         sum_gas_soc = 0
         sum_lng_consumption = 0
 
@@ -410,9 +413,13 @@ class Reporter:
             graph_data['gas_demand'][t] = gas_demand
             sum_gas_demand += gas_demand
 
-            rep_g['gas_production'].append(value(instance.gasP[t]))
-            graph_data['gas_production'][t] = value(instance.gasP[t])
-            sum_gas_production += value(instance.gasP[t])
+            rep_g['electrolysis'].append(value(instance.gasP[(t, 'electrolysis')]))
+            graph_data['electrolysis'][t] = value(instance.gasP[(t, 'electrolysis')])
+            sum_electrolysis += value(instance.gasP[(t, 'electrolysis')])
+
+            rep_g['SMR'].append(value(instance.gasP[(t, 'SMR')]))
+            graph_data['SMR'][t] = value(instance.gasP[(t, 'SMR')])
+            sum_SMR += value(instance.gasP[(t, 'SMR')])
 
             rep_g['CHP'].append(value(instance.gas[(t, 'CHP')]))
             graph_data['CHP'][t] = value(instance.gas[(t, 'CHP')])
@@ -438,29 +445,43 @@ class Reporter:
             graph_data['gas_SOC'][t] = value(instance.SOC_gas[t])
             sum_gas_soc += value(instance.SOC_gas[t])
 
+            rep_g['H2_grid_out'].append(value(instance.gasP[(t, 'H2_Grid')]))
+            graph_data['H2_grid_out'][t] = value(instance.gasP[(t, 'H2_Grid')])
+            sum_H2_grid_out += value(instance.gasP[(t, 'H2_Grid')])
+
+            rep_g['H2_grid_in'].append(value(instance.gas[(t, 'H2_Grid')]))
+            graph_data['H2_grid_in'][t] = value(instance.gas[(t, 'H2_Grid')])
+            sum_H2_grid_in += value(instance.gas[(t, 'H2_Grid')])
+
             lng_consumption = value(sum([instance.LNG[(t, tech)] for tech in instance.tech]))
             rep_g['LNG_consumption'].append(lng_consumption)
             graph_data['LNG_consumption'][t] = lng_consumption
             sum_lng_consumption += lng_consumption
 
         rep_g['gas_demand'].append(sum_gas_demand)
-        rep_g['gas_production'].append(sum_gas_production)
+        rep_g['electrolysis'].append(sum_electrolysis)
+        rep_g['SMR'].append(sum_SMR)
         rep_g['CHP'].append(sum_chp)
         rep_g['Fcell'].append(sum_fcell)
         rep_g['PP'].append(sum_pp)
         rep_g['gas_charging'].append(sum_gas_charging)
         rep_g['gas_discharging'].append(sum_gas_discharging)
         rep_g['gas_SOC'].append(sum_gas_soc)
+        rep_g['H2_grid_out'].append(sum_H2_grid_out)
+        rep_g['H2_grid_in'].append(sum_H2_grid_in)
         rep_g['LNG_consumption'].append(sum_lng_consumption)
 
         graph_data['gas_demand']['total'] = sum_gas_demand
-        graph_data['gas_production']['total'] = sum_gas_production
+        graph_data['electrolysis']['total'] = sum_electrolysis
+        graph_data['SMR']['total'] = sum_SMR
         graph_data['CHP']['total'] = sum_chp
         graph_data['Fcell']['total'] = sum_fcell
         graph_data['PP']['total'] = sum_pp
         graph_data['gas_charging']['total'] = sum_gas_charging
         graph_data['gas_discharging']['total'] = sum_gas_discharging
         graph_data['gas_SOC']['total'] = sum_gas_soc
+        graph_data['H2_grid_out']['total'] = sum_H2_grid_out
+        graph_data['H2_grid_in']['total'] = sum_H2_grid_in
         graph_data['LNG_consumption']['total'] = sum_lng_consumption
 
         self._graph_data['rep_g'] = graph_data

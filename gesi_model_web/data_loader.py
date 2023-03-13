@@ -180,12 +180,14 @@ class DataLoader:
         em_cap = df_Cap.loc['em_cap'][0]
         Solidwaste_cap = df_Cap.loc['Solidwaste_cap'][0]
         Biogas_cap = df_Cap.loc['Biogas_cap'][0]
-        N_grid_cap = df_Cap.loc['N_grid_cap'][0]      
+        N_grid_cap = df_Cap.loc['N_grid_cap'][0]
+        H_grid_cap = df_Cap.loc['H_grid_cap'][0]      
 
         init_data["em_cap"] = {None: em_cap}
         init_data["Solidwaste_cap"] = {None: Solidwaste_cap}
         init_data["Biogas_cap"] = {None: Biogas_cap}
         init_data["N_grid_cap"] = {None: N_grid_cap}
+        init_data["H_grid_cap"] = {None: H_grid_cap}
 
         self._data = {None: init_data}
 
@@ -233,10 +235,10 @@ class DataLoader:
         return self.extract_table('Hourly', 'A:f', 8760)
 
     def extract_cost(self):
-        return self.extract_table('ES', 'J:N', 20)
+        return self.extract_table('ES', 'J:N', 21)
 
     def extract_specs(self):
-        return self.extract_table('ES', 'A:h', 20)
+        return self.extract_table('ES', 'A:h', 21)
 
     def extract_General(self):
         return self.extract_table('Inputdata', 'A:B', 2)
@@ -245,7 +247,7 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:C', 13, 7)
 
     def extract_Cap(self):
-        return self.extract_partial_table('Inputdata', 'A:B', 22, 4)
+        return self.extract_partial_table('Inputdata', 'A:B', 22, 5)
 
     def extract_Demand(self):
         return self.extract_table('Demand', 'H:I', 7)
@@ -254,4 +256,4 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:B', 4, 7)
 
     def extract_Potential(self):
-        return self.extract_partial_table('ES', 'A:B', 23, 11)
+        return self.extract_partial_table('ES', 'A:B', 24, 11)
