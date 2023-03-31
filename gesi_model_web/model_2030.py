@@ -91,6 +91,7 @@ def define_parameter(M):
     M.Biogas_cap = Param(doc="constraints of Biogas amounts")    
     M.N_grid_cap = Param()
     M.H_grid_cap = Param()
+    M.Off_gas = Param()    
 
     # M.ratio_PV = Param()
     # M.ratio_WT = Param()
@@ -140,6 +141,19 @@ def define_parameter(M):
     M.hourly_capacity_EV = Param(M.t, initialize=init_hourly_capacity_EV)
 
     M.industry_gas = Param(M.t, initialize=init_industry_gas, doc="hourly industry gas demand")
+    M.hourly_Off_gas = Param(M.t, initialize=init_Off_gas)    
+
+    M.gas_S = Param(doc="Total Annual energy demand (TWh)")
+
+    M.el_h_new = Param(doc="electric heating demand newly shifted from fossil fuel heating")
+    M.el_h_old = Param(doc="electric heating demnad preexisting")
+    M.smart_share = Param(doc="share of electric heating demand response to supply and demand situation")
+
+    M.E_heat_fixed = Param(M.t, initialize=init_E_heat_fixed,
+                           doc="fixed heating demand by electricity COP assumed to be 3 (HP:80% and E_boiler:20%)")
+    M.E_heat_smart = Param(M.t, initialize=init_E_heat_smart,
+                           doc="smart heating demand by electricity COP assumed to be 3 (HP:80% and E_boiler:20%)")
+
 
     return M
 
@@ -184,8 +198,13 @@ def define_variable(M):
     M.em = Var(within=NonNegativeReals, doc="emission amount (tCO2)", initialize=0.0)
     # M.charge = Var(M.t,, within=NonNegativeReals, doc="hourly charging amount into pumped hydro")
     # M.discharge = Var(M.t, within=NonNegativeReals, doc="hourly discharging electricity from pumped hydro")
+    M.E_H_ind = Var(M.t, within=NonNegativeReals, doc="electricity consumption for smart heating", initialize=0.0)
     M.dis_ind_h = Var(M.t, within=NonNegativeReals, doc="discharing heat in individual heating", initialize=0.0)
     M.charge_ind_h = Var(M.t, within=NonNegativeReals, doc="charging heat in individual heating", initialize=0.0)
+    M.bi_H_grid_ch = Var(M.t, within=NonNegativeReals, initialize=0.0)
+    M.bi_H_grid_dch = Var(M.t, within=NonNegativeReals, initialize=0.0)
+    M.bi_battery_ch = Var(M.t, within=NonNegativeReals, initialize=0.0)
+    M.bi_battery_dis = Var(M.t, within=NonNegativeReals, initialize=0.0)
 
     return M
 
@@ -259,15 +278,8 @@ def define_constraints(M):
     M.hydro_charge = Constraint(M.t, rule=hydro_charge_rule, doc="pumped hydro charge equations")
     M.hydro_discharge = Constraint(M.t, rule=hydro_discharge_rule, doc="pumped hydro discharge equation")
 
-    # Conventional fuel plants operation
-
     # Oper cons PP
     M.oper_cons_pp_f2p = Constraint(M.F2P, rule=oper_cons_pp_f2p_rule)
-
-    # New Equation
-    # M.ratio_PV_WT_off1 = Constraint(rule=ratio_PV_WT_off1_rule)
-    # M.ratio_PV_WT_off2 = Constraint(rule=ratio_PV_WT_off2_rule)
-    # M.ratio_PV_WT_off3 = Constraint(rule=ratio_PV_WT_off3_rule)
     
     # Newly added
     M.new_added_constraints = Constraint(M.Upperlimit, rule=new_added_constraints_rule)
@@ -283,7 +295,6 @@ def define_constraints(M):
     # TES balance heat
     M.heat_SOC = Constraint(M.t, rule=heat_SOC_rule, doc="Heat storage balance equations")
     M.heat_SOC_boundary = Constraint(M.t, rule=heat_SOC_boundary_rule, doc="initial and final heat storage SOC")
-
     
     # Gas storage balance
     M.gas_SOC = Constraint(M.t, rule=gas_SOC_rule, doc="gas storage SOC equation")
@@ -296,14 +307,6 @@ def define_constraints(M):
     M.em_amount = Constraint(rule=em_amount_rule)
     M.em_limit = Constraint(rule=em_limit_rule)
 
-
-    # Biogas Constraints
-    # M.Biogas_cap = Constraint(rule=Biogas_limit_rule)
-    
-    # Solidwaste Constraints
-    # M.Solidwaste_cap = Constraint(rule=Solidwaste_limit_rule)
-
-
     # Curtailment limit
     M.curtail_limit = Constraint(M.t, rule=curtailment_limit_rule)
     M.SMR_conversion = Constraint(M.t, rule=SMR_conversion_rule)
@@ -312,12 +315,16 @@ def define_constraints(M):
     M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
     M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
     M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
+    # M.H_grid_rule2 = Constraint(M.t, rule=H_grid_rule2)
 
-  
-  #  M.National_Grid_limit = Constraint(M.t, rule=National_Grid_limit_rule)
+    # binary_charge_rule
+    # M.binary_H_grid_ch_rule = Constraint(M.t, rule=binary_H_grid_ch_rule)
+    # M.binary_H_grid_dch_rule = Constraint(M.t, rule=binary_H_grid_dch_rule)
+    # M.binary_H_grid_decision_rule = Constraint(M.t, rule=binary_H_grid_decision_rule)
 
-    # Total Cost
-    # M.total = Constraint(rule=total_cost, doc="total system cost")
+    M.binary_charge_rule = Constraint(M.t, rule=binary_charge_rule)
+    M.binary_discharge_rule = Constraint(M.t, rule=binary_discharge_rule)
+    M.binary_decision_rule = Constraint(M.t, rule=binary_decision_rule)
 
     return M
 

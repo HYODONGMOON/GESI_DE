@@ -144,16 +144,27 @@ class DataLoader:
         EL = df_Demand.loc['electricity'][0]
         H = df_Demand.loc['heat'][0]
         gas_D = df_Demand.loc['hydrogen'][0]
+        gas_S = df_Demand.loc['H_s'][0]
        
         init_data['EL'] = {None: EL}
         init_data['H'] = {None: H}
         init_data['gas_D'] = {None: gas_D}
-
+        init_data['gas_S'] = {None: gas_S}
 
         df_General = self.extract_General()
 
         discount = df_General.loc['discount'][0]
         init_data['discount'] = {None: discount}
+
+        df_Building = self.extract_Building()
+
+        el_h_new = df_Building.loc['el_h_new'][0]
+        el_h_old = df_Building.loc['el_h_old'][0]
+        smart_share = df_Building.loc['smart_share'][0]
+
+        init_data['el_h_new'] = {None: el_h_new}
+        init_data['el_h_old'] = {None: el_h_old}
+        init_data['smart_share'] = {None: smart_share}
 
 
         df_Transportation = self.extract_Transportation()
@@ -182,12 +193,14 @@ class DataLoader:
         Biogas_cap = df_Cap.loc['Biogas_cap'][0]
         N_grid_cap = df_Cap.loc['N_grid_cap'][0]
         H_grid_cap = df_Cap.loc['H_grid_cap'][0]      
+        Off_gas = df_Cap.loc['Off_gas'][0]      
 
         init_data["em_cap"] = {None: em_cap}
         init_data["Solidwaste_cap"] = {None: Solidwaste_cap}
         init_data["Biogas_cap"] = {None: Biogas_cap}
         init_data["N_grid_cap"] = {None: N_grid_cap}
         init_data["H_grid_cap"] = {None: H_grid_cap}
+        init_data["Off_gas"] = {None: Off_gas}
 
         self._data = {None: init_data}
 
@@ -247,10 +260,13 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:C', 13, 7)
 
     def extract_Cap(self):
-        return self.extract_partial_table('Inputdata', 'A:B', 22, 5)
+        return self.extract_partial_table('Inputdata', 'A:B', 22, 6)
+    
+    def extract_Building(self):
+        return self.extract_partial_table('Inputdata', 'A:B', 30, 3)
 
     def extract_Demand(self):
-        return self.extract_table('Demand', 'H:I', 7)
+        return self.extract_table('Demand', 'H:I', 9)
 
     def extract_Transportation(self):
         return self.extract_partial_table('Inputdata', 'A:B', 4, 7)

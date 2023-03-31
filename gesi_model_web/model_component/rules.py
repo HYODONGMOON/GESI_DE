@@ -16,10 +16,13 @@ def balance_p_rule(M, t):
          # -charge(t)+discharge(t)
          # electricity consumption by flexible technologies
          - sum([M.eld[(t, flexible)] for flexible in M.flexible])
+         - M.E_H_ind[t]
+
          # Curtailment
          - M.curtail[t])
-        == (M.hourly_demand[t]))
-
+        == (M.hourly_demand[t]
+            + value(M.el_h_new) * (1 - value(M.smart_share)) * M.h_H_demand[t]
+            - value(M.el_h_old) * value(M.smart_share) * M.h_H_demand[t]))
 
 def balance_th_rule(M, t):
     return (
@@ -28,6 +31,13 @@ def balance_th_rule(M, t):
                    - sum([M.heatP[(t, G2H)] for G2H in M.G2H])
                    - M.dis_th[t]
                    + M.ch_th[t]) == - M.hourly_heat[t]
+
+
+def balance_ind_th_rule(M, t):
+    # return (M.E_H_ind[t] * 3) + M.dis_ind_h[t] - M.charge_ind_h[t] == M.E_heat_smart[t]
+    return (- (M.E_H_ind[t] * 3)
+            + M.charge_ind_h[t]
+            - M.dis_ind_h[t]) == - M.E_heat_smart[t]
 
 
 # Conventional Fuel Plants Operation
@@ -51,6 +61,20 @@ def heat_SOC_boundary_rule(M, t):
 
     return Constraint.Skip
 
+# TES Individual SOC
+def heat_ind_SOC_rule(M, t):
+    if t > 1:
+        return M.SOC_ind_th[t] == (0.9998 * M.SOC_ind_th[t - 1] - M.dis_ind_h[t] + M.charge_ind_h[t])
+
+    return Constraint.Skip
+
+
+def heat_ind_SOC_boundary_rule(M, t):
+    if t == 1 or t == 8760:
+        return M.SOC_ind_th[t] == (value(M.Stor_H_ind) / 2.)
+
+    return Constraint.Skip
+
 
 # Gas Balance Equations
 # def balance_gas_rule(M, t):
@@ -58,10 +82,13 @@ def heat_SOC_boundary_rule(M, t):
 
 def balance_gas_rule(M, t):
     return (
-                   - sum([M.gasP[(t, RH2)] for RH2 in M.RH2])
-                   - sum([M.gasP[(t, P2G)] for P2G in M.P2G])
-                   - M.dis_gas[t]
-                   + M.ch_gas[t]) == - M.industry_gas[t]
+            sum([M.gas[(t, gas_all)] for gas_all in M.gas_all])
+            - sum([M.gasP[(t, RH2)] for RH2 in M.RH2])
+            - sum([M.gasP[(t, P2G)] for P2G in M.P2G])
+            - M.gasP[(t, 'H2_Grid')]
+            - M.dis_gas[t]
+            + M.ch_gas[t] 
+            - M.hourly_Off_gas[t]) == - M.industry_gas[t]
 
 
 # Gas Storage Balance
@@ -342,11 +369,25 @@ def N_grid_rule(M, t):
 def N_grid_rule1(M, t):
     return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
 
-def H_grid_rule(M, t):
-    return M.gasP[(t, 'H2_Grid')] == value(M.H_grid_cap)/8760
-
+# using by hydrogen fuels = excel based constant
 def H_grid_rule1(M, t):
-    return M.gas[(t, 'H2_Grid')] <= value(M.H_grid_cap)/8760
+    return M.gas[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
+
+# def H_grid_rule2(M, t):
+    return sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) == value(M.gas_S)
+
+def H_grid_rule(M, t):
+    return M.gasP[(t, 'H2_Grid')] >= (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))
+
+# def binary_H_grid_ch_rule(M, t):
+    return M.gas[(t, 'GS_interface')] <= M.bi_H_grid_ch[t]
+
+# def binary_H_grid_dch_rule(M, t):
+    return M.gasP[(t, 'GS_interface')] <= M.bi_H_grid_dch[t]
+
+# def binary_H_grid_decision_rule(M, t):
+    return M.bi_H_grid_ch[t] + M.bi_H_grid_dch[t] <= 1.5
+
 
 # National_Grid_in constraints
 # def National_Grid_limit_rule(M, t):

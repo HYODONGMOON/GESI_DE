@@ -61,6 +61,7 @@ class Reporter:
         rep_g = self.report_rep_g(instance)
         new_invest = self.report_new_invest(instance)
         rep_annual = self.report_rep_annual(instance)
+        rep_ind_h = self.report_rep_ind_h(instance)
         rep_economic = self.report_rep_economic(instance)
         # energy_demand_index, energy_demand = self.report_energy_demand()
         facility_configuration = self.report_facility_configuration()
@@ -75,6 +76,7 @@ class Reporter:
         df3 = pd.DataFrame(rep_g, index=index)
         df4 = pd.DataFrame(new_invest, index=scalar_index)
         df5 = pd.DataFrame(rep_annual, index=scalar_index)
+        df6 = pd.DataFrame(rep_ind_h, index=index)
         df7 = pd.DataFrame(rep_economic, index=scalar_index)
         df9 = pd.DataFrame(facility_configuration, index=scalar_index)
         df10 = pd.DataFrame(power_generation, index=scalar_index)
@@ -87,6 +89,7 @@ class Reporter:
         df3.to_excel(writer, sheet_name='rep_g')
         df4.to_excel(writer, sheet_name='new_invest')
         df5.to_excel(writer, sheet_name='rep_annual')
+        df6.to_excel(writer, sheet_name='rep_ind_h')
         df7.to_excel(writer, sheet_name='rep_economic')
         df9.to_excel(writer, sheet_name='설비구성')
         df10.to_excel(writer, sheet_name='발전량')
@@ -134,8 +137,9 @@ class Reporter:
             graph_data[key] = dict()
 
         for t in range(1, self.t + 1):
-            el_demand = value(instance.hourly_demand[t])
-
+            el_demand = value(instance.hourly_demand[t]
+                            + value(instance.el_h_new) * (1 - value(instance.smart_share)) * instance.h_H_demand[t]
+                            - value(instance.el_h_old) * value(instance.smart_share) * instance.h_H_demand[t])
             rep['el_demand'].append(el_demand)
             graph_data['el_demand'][t] = el_demand
             sum_el_demand += el_demand
@@ -176,7 +180,7 @@ class Reporter:
             graph_data['pumped_out'][t] = value(instance.elp[(t, 'pumped')])
             sum_pumped_out += value(instance.elp[(t, 'pumped')])
 
-            p2h = value(instance.eld[(t, 'DH_HP')])
+            p2h = value(instance.eld[(t, 'DH_HP')] + instance.E_H_ind[t])
             rep['P2H'].append(p2h)
             graph_data['P2H'][t] = p2h
             sum_p2h += p2h
@@ -517,6 +521,57 @@ class Reporter:
 
         return rep_annual
 
+    def report_rep_ind_h(self, instance):
+        rep_ind_h = dict()
+        graph_data = dict()
+
+        for key in self.result_sets['ind_h']:
+            rep_ind_h[key] = list()
+            graph_data[key] = dict()
+
+        sum_soc_ind = 0
+        sum_dis_ind = 0
+        sum_charge_ind = 0
+        sum_e_heat_sm = 0
+        sum_el_demand_ind_h = 0
+
+        for t in range(1, self.t + 1):
+            rep_ind_h['SOC_ind'].append(value(instance.SOC_ind_th[t]))
+            graph_data['SOC_ind'][t] = value(instance.SOC_ind_th[t])
+            sum_soc_ind += value(instance.SOC_ind_th[t])
+
+            rep_ind_h['dis_ind'].append(value(instance.dis_ind_h[t]))
+            graph_data['dis_ind'][t] = value(instance.dis_ind_h[t])
+            sum_dis_ind += value(instance.dis_ind_h[t])
+
+            rep_ind_h['charge_ind'].append(value(instance.charge_ind_h[t]))
+            graph_data['charge_ind'][t] = value(instance.charge_ind_h[t])
+            sum_charge_ind += value(instance.charge_ind_h[t])
+
+            rep_ind_h['E_heat_sm'].append(value(instance.E_heat_smart[t]))
+            graph_data['E_heat_sm'][t] = value(instance.E_heat_smart[t])
+            sum_e_heat_sm += value(instance.E_heat_smart[t])
+
+            rep_ind_h['EL_demand_ind_h'].append(value(instance.E_H_ind[t]))
+            graph_data['EL_demand_ind_h'][t] = value(instance.E_H_ind[t])
+            sum_el_demand_ind_h += value(instance.E_H_ind[t])
+
+        rep_ind_h['SOC_ind'].append(sum_soc_ind)
+        rep_ind_h['dis_ind'].append(sum_dis_ind)
+        rep_ind_h['charge_ind'].append(sum_charge_ind)
+        rep_ind_h['E_heat_sm'].append(sum_e_heat_sm)
+        rep_ind_h['EL_demand_ind_h'].append(sum_el_demand_ind_h)
+
+        graph_data['SOC_ind']['total'] = sum_soc_ind
+        graph_data['dis_ind']['total'] = sum_dis_ind
+        graph_data['charge_ind']['total'] = sum_charge_ind
+        graph_data['E_heat_sm']['total'] = sum_e_heat_sm
+        graph_data['EL_demand_ind_h']['total'] = sum_el_demand_ind_h
+
+        self._graph_data['rep_ind_h'] = graph_data
+
+        return rep_ind_h
+
 
     def report_rep_economic(self, instance):
         rep_economic = dict()
@@ -627,7 +682,7 @@ class Reporter:
             ],
             'P2H_heat': [
                 'heat',
-                self._graph_data['rep_h']['DH_HP_h']['total'] 
+                self._graph_data['rep_h']['DH_HP_h']['total'] + (self._graph_data['rep_ind_h']['EL_demand_ind_h']['total'] * 3)
             ]
         }
 
