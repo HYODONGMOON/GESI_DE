@@ -48,6 +48,7 @@ class ModelSolver:
         self._init_time = datetime.datetime.now()
         self._solver_instance = SolverInstance(model, self._configuration, logger)
 
+       
         # Create Reporter Instance
         self._save_result = self._configuration.save_result
         self._reporter = Reporter(self._configuration, self._data_loader.load_result_data(), logger)
@@ -85,3 +86,4 @@ class ModelSolver:
         self.print_running_time()
 
         return result
+

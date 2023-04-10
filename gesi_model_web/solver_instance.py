@@ -44,3 +44,5 @@ class SolverInstance:
             result.write()
 
         return self._instance, result
+    
+    
