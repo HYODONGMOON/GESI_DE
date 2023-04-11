@@ -15,6 +15,6 @@ def total_rule(M):
             + sum([M.eld[(t, 'electrolysis')] * M.cost[('electrolysis', 'variable_OM')] for t in M.t])
             + sum([M.eld[(t, 'SMR')] * M.cost[('SMR', 'variable_OM')] for t in M.t])
             + sum([M.eld[(t, 'pumped')] * M.cost[('pumped', 'variable_OM')] for t in M.t])
-            + sum([M.eld[(t, 'National_Grid')] * M.cost[('National_Grid', 'variable_OM')] for t in M.t])
+            - sum([M.eld[(t, 'National_Grid')] * M.cost[('National_Grid', 'variable_OM')] for t in M.t])
             + sum([M.LNG[(t, tech)] * M.fossil[('NG', 'price')] for t in M.t for tech in M.tech])
             + (value(M.em) * M.fossil[('emission', 'price')]))

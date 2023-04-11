@@ -330,9 +330,9 @@ class Reporter:
             graph_data['Waste_h'][t] = value(instance.heatP[(t, 'Waste')])
             sum_Waste_h += value(instance.heatP[(t, 'Waste')])
 
-            rep_h['Fcell_h'].append(value(instance.heatP1[(t, 'Fcell')]))
-            graph_data['Fcell_h'][t] = value(instance.heatP1[(t, 'Fcell')])
-            sum_fcell_h += value(instance.heatP1[(t, 'Fcell')])
+            rep_h['Fcell_h'].append(value(instance.heatP[(t, 'Fcell')]))
+            graph_data['Fcell_h'][t] = value(instance.heatP[(t, 'Fcell')])
+            sum_fcell_h += value(instance.heatP[(t, 'Fcell')])
 
             rep_h['DH_HP_h'].append(value(instance.heatP[(t, 'DH_HP')]))
             graph_data['DH_HP_h'][t] = value(instance.heatP[(t, 'DH_HP')])
@@ -429,9 +429,9 @@ class Reporter:
             graph_data['CHP'][t] = value(instance.gas[(t, 'CHP')])
             sum_chp += value(instance.gas[(t, 'CHP')])
 
-            rep_g['Fcell'].append(value(instance.gas1[(t, 'Fcell')]))
-            graph_data['Fcell'][t] = value(instance.gas1[(t, 'Fcell')])
-            sum_fcell += value(instance.gas1[(t, 'Fcell')])
+            rep_g['Fcell'].append(value(instance.gas[(t, 'Fcell')]))
+            graph_data['Fcell'][t] = value(instance.gas[(t, 'Fcell')])
+            sum_fcell += value(instance.gas[(t, 'Fcell')])
 
             rep_g['PP'].append(value(instance.gas[(t, 'PP')]))
             graph_data['PP'][t] = value(instance.gas[(t, 'PP')])

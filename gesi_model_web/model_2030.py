@@ -180,9 +180,9 @@ def define_variable(M):
     M.curtail = Var(M.t, within=NonNegativeReals, doc="hourly curtailment amount", initialize=0.0)
     # M.WasteP = Var(M.t, within=NonNegativeReals, doc="hourly W2Hydrogen amount", initialize=0.0)
 
-    M.elp1 = Var(M.t, M.tech, within=NonNegativeReals, doc="electricity production by technology", initialize=0.0)
-    M.heatP1 = Var(M.t, M.tech, within=NonNegativeReals, doc="heat production by technology", initialize=0.0)
-    M.gas1 = Var(M.t, M.gas_all, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
+    # M.elp1 = Var(M.t, M.tech, within=NonNegativeReals, doc="electricity production by technology", initialize=0.0)
+    # M.heatP1 = Var(M.t, M.tech, within=NonNegativeReals, doc="heat production by technology", initialize=0.0)
+    # M.gas1 = Var(M.t, M.gas_all, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
 
     M.fu = Var(M.t, M.tech, within=NonNegativeReals, doc="hourly fuel consumption", initialize=0.0)
     M.SOC = Var(M.t, within=NonNegativeReals, doc="storage level in pumped hydro dam", initialize=0.0)
@@ -248,8 +248,8 @@ def define_constraints(M):
     # Capacity Constraints
     M.capacity_elp = Constraint(M.t, M.power_stay, rule=capacity_elp_rule,
                                 doc="capacity constraints for electricity production technologies (no expansion)")
-    M.capacity_elp1 = Constraint(M.t, M.power_ex, rule=capacity_elp1_rule,
-                                 doc="capacity constraints for electricity production technologies (expansion)")
+    # M.capacity_elp1 = Constraint(M.t, M.power_ex, rule=capacity_elp1_rule,
+    #                             doc="capacity constraints for electricity production technologies (expansion)")
     M.capacity_eld = Constraint(M.t, M.flexible_stay, rule=capacity_eld_rule,
                                 doc="capacity constraints for electricity consumption technologies (no expansion)")
     M.capacity_eld1 = Constraint(M.t, M.flexible_ex, rule=capacity_eld1_rule,
@@ -315,7 +315,7 @@ def define_constraints(M):
     M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
     M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
     M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
-    # M.H_grid_rule2 = Constraint(M.t, rule=H_grid_rule2)
+    M.H_grid_rule2 = Constraint(M.t, rule=H_grid_rule2)
 
     # binary_charge_rule
     # M.binary_H_grid_ch_rule = Constraint(M.t, rule=binary_H_grid_ch_rule)

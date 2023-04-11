@@ -164,7 +164,7 @@ def capacity_elp_rule(M, t, power_stay):
     return M.elp[(t, power_stay)] <= M.specs[(power_stay, 'cap')]
 
 
-def capacity_elp1_rule(M, t, power_ex):
+# def capacity_elp1_rule(M, t, power_ex):
     # return M.elp[(t, power_ex)] <= (M.New[power_ex] + M.specs[(power_ex, 'cap')])
     return M.elp[(t, power_ex)] - M.New[power_ex] <= M.specs[(power_ex, 'cap')]
 
@@ -373,11 +373,11 @@ def N_grid_rule1(M, t):
 def H_grid_rule1(M, t):
     return M.gas[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
 
-# def H_grid_rule2(M, t):
+def H_grid_rule2(M, t):
     return sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) == value(M.gas_S)
 
 def H_grid_rule(M, t):
-    return M.gasP[(t, 'H2_Grid')] >= (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))
+    return M.gasP[(t, 'H2_Grid')] == (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))/8760
 
 # def binary_H_grid_ch_rule(M, t):
     return M.gas[(t, 'GS_interface')] <= M.bi_H_grid_ch[t]
