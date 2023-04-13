@@ -312,8 +312,10 @@ def define_constraints(M):
     M.SMR_conversion = Constraint(M.t, rule=SMR_conversion_rule)
     M.WtX_conversion_rule = Constraint(M.t, rule=WtX_conversion_rule)
     M.N_grid_rule = Constraint(M.t, rule=N_grid_rule)
-    M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
-    M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
+    ## 20230412 수정
+#    M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
+    ## 20230412 수정
+#    M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
     M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
     M.H_grid_rule2 = Constraint(M.t, rule=H_grid_rule2)
 
@@ -322,9 +324,9 @@ def define_constraints(M):
     # M.binary_H_grid_dch_rule = Constraint(M.t, rule=binary_H_grid_dch_rule)
     # M.binary_H_grid_decision_rule = Constraint(M.t, rule=binary_H_grid_decision_rule)
 
-    M.binary_charge_rule = Constraint(M.t, rule=binary_charge_rule)
-    M.binary_discharge_rule = Constraint(M.t, rule=binary_discharge_rule)
-    M.binary_decision_rule = Constraint(M.t, rule=binary_decision_rule)
+    # M.binary_charge_rule = Constraint(M.t, rule=binary_charge_rule)
+    # M.binary_discharge_rule = Constraint(M.t, rule=binary_discharge_rule)
+    # M.binary_decision_rule = Constraint(M.t, rule=binary_decision_rule)
 
     return M
 

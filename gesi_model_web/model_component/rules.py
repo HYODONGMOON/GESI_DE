@@ -321,18 +321,18 @@ def battery_power_energy_rule(M, t):
     return (M.New['b_interface'] + M.specs[('b_interface', 'cap')]) <= (
                 (M.New['battery'] + M.specs[('battery', 'cap')]) / 6.)
 
-
-def binary_charge_rule(M, t):
+## 20230412 수정
+#def binary_charge_rule(M, t):
     # return M.eld[(t, 'b_interface')] / 10000000000 <= M.bi_battery_ch[t]
     return M.eld[(t, 'b_interface')] <= M.bi_battery_ch[t]
 
-
-def binary_discharge_rule(M, t):
+## 20230412 수정
+#def binary_discharge_rule(M, t):
     # return M.elp[(t, 'b_interface')] / 10000000000 <= M.bi_battery_dis[t]
     return M.elp[(t, 'b_interface')] <= M.bi_battery_dis[t]
 
-
-def binary_decision_rule(M, t):
+## 20230412 수정
+#def binary_decision_rule(M, t):
     return M.bi_battery_ch[t] + M.bi_battery_dis[t] <= 1.5
 
 
@@ -345,7 +345,8 @@ def em_amount_rule(M):
 
 def em_limit_rule(M):
     # return M.em <= value(M.em_cap)
-    return M.em == value(M.em_cap)
+    ## 20230412 수정
+    return M.em <= value(M.em_cap)
 
 
 # Biogas constraints
@@ -358,41 +359,46 @@ def em_limit_rule(M):
 
 # Environmental Infra constraints
 def SMR_conversion_rule(M, t):
-    return M.eld[(t, 'SMR')] == value(M.Biogas_cap)/8760
+    ## 20230412 수정
+    return M.eld[(t, 'SMR')] <= value(M.Biogas_cap)/8760
 
 def WtX_conversion_rule(M, t):
-    return M.elp[(t, 'Waste')] == value(M.Solidwaste_cap)/8760/4
+    ## 20230412 수정
+    return M.elp[(t, 'Waste')] <= value(M.Solidwaste_cap)/8760/4
 
 def N_grid_rule(M, t):
-    return M.elp[(t, 'National_Grid')] == value(M.N_grid_cap)/8760
-
-def N_grid_rule1(M, t):
-    return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
+    ##20230412 수정
+    return M.elp[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
+## 20230412 수정
+#def N_grid_rule1(M, t):
+#    return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
 
 # using by hydrogen fuels = excel based constant
 def H_grid_rule1(M, t):
     return M.gas[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
-
+    
+## 20230412 수정
 def H_grid_rule2(M, t):
-    return sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) == value(M.gas_S)
-
-def H_grid_rule(M, t):
-    return M.gasP[(t, 'H2_Grid')] == (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))/8760
+    return sum(M.gasP[(t,'H2_Grid')] for t in M.t) <=M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + sum(M.industry_gas[t] for t in M.t))
+    
+## 20230412 수정
+#def H_grid_rule(M, t):
+    #return M.gasP[(t, 'H2_Grid')] == (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))/8760
 
 # def binary_H_grid_ch_rule(M, t):
-    return M.gas[(t, 'GS_interface')] <= M.bi_H_grid_ch[t]
+    #return M.gas[(t, 'GS_interface')] <= M.bi_H_grid_ch[t]
 
 # def binary_H_grid_dch_rule(M, t):
-    return M.gasP[(t, 'GS_interface')] <= M.bi_H_grid_dch[t]
+    #return M.gasP[(t, 'GS_interface')] <= M.bi_H_grid_dch[t]
 
 # def binary_H_grid_decision_rule(M, t):
-    return M.bi_H_grid_ch[t] + M.bi_H_grid_dch[t] <= 1.5
+    #return M.bi_H_grid_ch[t] + M.bi_H_grid_dch[t] <= 1.5
 
 
 # National_Grid_in constraints
 # def National_Grid_limit_rule(M, t):
     # return sum(M.elp[t, 'National_Grid'] for t in M.t) <= (sum(M.hourly_demand[t] for t in M.t) * M.electricity_import_share)
-    return sum(M.elp[t, 'National_Grid'] for t in M.t) == (value(M.EL) * 1000000 * M.electricity_import_share) # 선언하는데 시간이 오래 걸림(180초 이상)
+    #return sum(M.elp[t, 'National_Grid'] for t in M.t) == (value(M.EL) * 1000000 * M.electricity_import_share) # 선언하는데 시간이 오래 걸림(180초 이상)
     
 
 # Curtailment Limit
