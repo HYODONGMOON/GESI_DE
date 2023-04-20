@@ -37,6 +37,13 @@ class SolverInstance:
         self._year = year
 
     def solve(self):
+        self._solver.options['mipgap'] = 1e-4  # MIP 갭 설정 (예: 0.01%)
+
+        # 수치 안정성을 높이는 옵션을 추가합니다.
+        # self._solver.options['preprocessing'] = 'presolve'
+        # self._solver.options['numerical'] = 'feasibility'
+        # self._solver.options['simplex_tolerances'] = 'feasibility'
+
         self._logger.print_info_line("year {} : Start Solving Model.".format(self._year))
         result = self._solver.solve(self._instance, tee=self._verbose)
 

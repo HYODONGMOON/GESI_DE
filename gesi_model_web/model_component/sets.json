@@ -8896,6 +8896,7 @@
         "H2_Grid"
     ],
 
+   
     "flexible": [
         "b_interface",
         "pumped",
@@ -8936,7 +8937,6 @@
         "Wind_off",
         "PV",
         "CHP",
-        "Fcell",
         "electrolysis",
         "battery",
         "b_interface",
@@ -8950,7 +8950,8 @@
         "SMR",
         "National_Grid",
         "Waste",
-        "H2_Grid"
+        "H2_Grid",
+        "Fcell"
     ],
  
     "RE": [
@@ -8984,8 +8985,7 @@
         "CHP",
         "PP",
         "Fcell",
-        "DH_Boiler",
-        "H2_Grid"        
+        "DH_Boiler"        
     ],
 
     "m": [
@@ -10885,11 +10885,12 @@
         1459,
         1460
     ],
+
     "fuel": [
         "NG",
         "oil",
         "Biogas",
-        "Solidwaste",
+        "Hydrogen",             
         "N_grid",
         "emission"
     ],

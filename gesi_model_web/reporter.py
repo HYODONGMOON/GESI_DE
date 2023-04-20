@@ -127,7 +127,8 @@ class Reporter:
         sum_pumped_soc = 0
         sum_battery_soc = 0
         sum_lng = 0
-        sum_ng_consumption = 0
+        sum_LNG_PP = 0
+        sum_LNG_CHP = 0
         sum_SMR = 0
         sum_National_Grid_in = 0
         sum_National_Grid_out = 0
@@ -171,6 +172,14 @@ class Reporter:
             rep['Fcell'].append(value(instance.elp[(t, 'Fcell')]))
             graph_data['Fcell'][t] = value(instance.elp[(t, 'Fcell')])
             sum_fcell += value(instance.elp[(t, 'Fcell')])
+
+            rep['LNG_PP'].append(value(instance.LNG[(t, 'PP')]))
+            graph_data['LNG_PP'][t] = value(instance.LNG[(t, 'PP')])
+            sum_fcell += value(instance.LNG[(t, 'PP')])
+
+            rep['LNG_CHP'].append(value(instance.LNG[(t, 'CHP')]))
+            graph_data['LNG_CHP'][t] = value(instance.LNG[(t, 'CHP')])
+            sum_fcell += value(instance.LNG[(t, 'CHP')])
 
             rep['battery_out'].append(value(instance.elp[(t, 'b_interface')]))
             graph_data['battery_out'][t] = value(instance.elp[(t, 'b_interface')])
@@ -267,7 +276,8 @@ class Reporter:
         rep['pumped_soc'].append(sum_pumped_soc)
         rep['battery_soc'].append(sum_battery_soc)
         rep['LNG'].append(sum_lng)
-        rep['NG_consumption'].append(sum_ng_consumption)
+        rep['LNG_PP'].append(sum_LNG_PP)
+        rep['LNG_CHP'].append(sum_LNG_CHP)
 
         graph_data['el_demand']['total'] = sum_el_demand
         graph_data['PV']['total'] = sum_pv
@@ -292,7 +302,8 @@ class Reporter:
         graph_data['pumped_soc']['total'] = sum_pumped_soc
         graph_data['battery_soc']['total'] = sum_battery_soc
         graph_data['LNG']['total'] = sum_lng
-        graph_data['NG_consumption']['total'] = sum_ng_consumption
+        graph_data['LNG_PP']['total'] = sum_LNG_PP 
+        graph_data['LNG_CHP']['total'] = sum_LNG_CHP 
 
         self._graph_data['rep'] = graph_data
 
@@ -453,9 +464,9 @@ class Reporter:
             graph_data['H2_grid_out'][t] = value(instance.gasP[(t, 'H2_Grid')])
             sum_H2_grid_out += value(instance.gasP[(t, 'H2_Grid')])
 
-            rep_g['H2_grid_in'].append(value(instance.gas[(t, 'H2_Grid')]))
-            graph_data['H2_grid_in'][t] = value(instance.gas[(t, 'H2_Grid')])
-            sum_H2_grid_in += value(instance.gas[(t, 'H2_Grid')])
+            rep_g['H2_grid_in'].append(value(instance.gasG[(t, 'H2_Grid')]))
+            graph_data['H2_grid_in'][t] = value(instance.gasG[(t, 'H2_Grid')])
+            sum_H2_grid_in += value(instance.gasG[(t, 'H2_Grid')])
 
             lng_consumption = value(sum([instance.LNG[(t, tech)] for tech in instance.tech]))
             rep_g['LNG_consumption'].append(lng_consumption)
@@ -616,9 +627,8 @@ class Reporter:
         return rep_economic
 
     def report_facility_configuration(self):
-        pumped = 6700
-
-      
+        pumped = 0
+        
         facility_configuration = {
             'Wind_on': self._graph_data['new_invest']['Wind_on'],
             'Wind_off': self._graph_data['new_invest']['Wind_off'],
@@ -626,6 +636,7 @@ class Reporter:
             'CHP': self._graph_data['new_invest']['CHP'],
             'Waste': self._graph_data['new_invest']['Waste'],
             'Fcell': self._graph_data['new_invest']['Fcell'],
+            'PP': self._graph_data['new_invest']['PP'],
             # 'Nuke': self._data['specs_extended'].loc['Nuke']['Final'] + self._graph_data['new_invest']['Nuke'],
             'DH_HP': self._graph_data['new_invest']['DH_HP'],
             'DH_boiler': self._graph_data['new_invest']['DH_Boiler'],
@@ -652,6 +663,7 @@ class Reporter:
             'PV': self._graph_data['rep']['PV']['total'] / 1000000,
             'CHP': self._graph_data['rep']['CHP']['total'] / 1000000,
             'Fcell': self._graph_data['rep']['Fcell']['total'] / 1000000,
+            'PP': self._graph_data['rep']['PP']['total'] / 1000000,
             'Waste': self._graph_data['rep']['Waste']['total'] / 1000000,
             'Electrolysis': self._graph_data['rep']['electrolysis']['total'] / 1000000,
             'SMR': self._graph_data['rep']['SMR']['total'] / 1000000,

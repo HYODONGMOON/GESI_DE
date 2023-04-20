@@ -15,9 +15,10 @@ sys.path.append(web_model_dir)
 
 from gesi_model_web.run import ModelExecutor
 
-data_path = os.path.join(current_path, 'GESI_DE.xlsx')
+data_path = os.path.join(current_path, 'GESI_DE_1.xlsx')
 name = 'gesi_web_jupyter'
 
 executor = ModelExecutor(data_path, name=name, save_result=True, solver='cplex', verbose=1)
 solver = executor.run_once()
+
 

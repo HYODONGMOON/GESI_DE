@@ -44,11 +44,11 @@ def define_set(M):
     M.P2H = Set(within=M.tech, doc='power to heat technlogies')
     M.P2G = Set(within=M.tech, doc='power to Hydrogen technlogies')
     M.RH2 = Set(within=M.tech, doc='Hydrogen production by reforming')
-    M.G2G = Set(within=M.tech, doc='Hydrogen production from Hydrogen grid')
+    M.G2G = Set(within=M.tech, doc='Hydrogen production by reforming')
 
     M.thermal = Set(within=M.tech, doc='thermal technologies')
     M.mobile = Set(within=M.tech, doc='inputdata technologies')
-    M.expand = Set(within=M.f_tech, doc='expandable technologies')
+    M.expand = Set(within=M.f_tech, doc='expandable technologies')    
     # M.RE = Set(within=M.tech, doc='renewable power plants')
     M.gas_all = Set(doc='Set for gas calculation')
     M.trait = Set(doc='technology specification')
@@ -97,7 +97,7 @@ def define_parameter(M):
     # M.ratio_WT = Param()
     # M.ratio_WT_off = Param()
     M.hydrogen_import_share = Param()
-    M.electricity_import_share = Param()
+    # M.electricity_import_share = Param()
 
     M.sum_demand = Param(initialize=init_sum_demand, doc='demand summation')
     M.sum_H_demand = Param(initialize=init_sum_H_demand, doc='heat demand summation')
@@ -143,7 +143,7 @@ def define_parameter(M):
     M.industry_gas = Param(M.t, initialize=init_industry_gas, doc="hourly industry gas demand")
     M.hourly_Off_gas = Param(M.t, initialize=init_Off_gas)    
 
-    M.gas_S = Param(doc="Total Annual energy demand (TWh)")
+    # M.gas_S = Param(doc="Total Annual energy demand (TWh)")
 
     M.el_h_new = Param(doc="electric heating demand newly shifted from fossil fuel heating")
     M.el_h_old = Param(doc="electric heating demnad preexisting")
@@ -193,6 +193,9 @@ def define_variable(M):
     # M.gas = Var(M.t, M.tech, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
     M.gas = Var(M.t, M.gas_all, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
     M.gasP = Var(M.t, M.tech, within=NonNegativeReals, doc="gas production", initialize=0.0)
+    
+    M.gasG = Var(M.t, M.G2G, within=NonNegativeReals, initialize=0.0)
+    
     M.SOC_battery = Var(M.t, within=NonNegativeReals, initialize=0.0)
     M.New = Var(M.tech, within=NonNegativeReals, doc="new added capacity for expandable technologies", initialize=0.0)
     M.em = Var(within=NonNegativeReals, doc="emission amount (tCO2)", initialize=0.0)
@@ -223,6 +226,7 @@ def define_constraints(M):
 
     # Conversion
     M.gas_el_conversion = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule, doc="hydrogen converted from electricity")
+    # M.gas_el_conversion1 = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule1, doc="hydrogen converted from electricity")
     M.gas_fuel_conversion = Constraint(M.t, M.RH2, rule=gas_fuel_conversion_rule, doc="hydrogen converted by reforming other sources")
     M.EL_conversion = Constraint(M.t, M.F2P, rule=EL_conversion_rule,
                                  doc="electricity conversion from dispatchable plant")
@@ -317,8 +321,8 @@ def define_constraints(M):
     ## 20230412 수정
 #    M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
     M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
-    M.H_grid_rule2 = Constraint(M.t, rule=H_grid_rule2)
-
+    M.H_grid_rule2 = Constraint(rule=H_grid_rule2)
+    
     # binary_charge_rule
     # M.binary_H_grid_ch_rule = Constraint(M.t, rule=binary_H_grid_ch_rule)
     # M.binary_H_grid_dch_rule = Constraint(M.t, rule=binary_H_grid_dch_rule)

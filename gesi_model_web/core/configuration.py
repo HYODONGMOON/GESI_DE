@@ -58,5 +58,5 @@ class Configuration:
         # self.ratio_wt = kwargs.pop('ratio_wt', 0)
         # self.ratio_WT_off = kwargs.pop('ratio_wt_off', 0)
         self.hydrogen_import_share = kwargs.pop('hydrogen_import_share',0)
-        self.electricity_import_share = kwargs.pop('electricity_import_share',0)
+        # self.electricity_import_share = kwargs.pop('electricity_import_share',0)
 

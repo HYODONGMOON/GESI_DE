@@ -53,7 +53,7 @@ class DataLoader:
         # self._control['ratio_wt'] = df_control.loc['ratio_WT'][1]
         # self._control['ratio_wt_off'] = df_control.loc['ratio_WT_off'][1]
         self._control['hydrogen_import_share'] = df_control.loc['hydrogen_import_share'][1]
-        self._control['electricity_import_share'] = df_control.loc['electricity_import_share'][1]
+        # self._control['electricity_import_share'] = df_control.loc['electricity_import_share'][1]
 
         # self._control['building_retrofit_rate'] = df_control.loc['building retrofit rate'][1]
         # self._control['bevs_share'] = df_control.loc['BEVs share'][1]
@@ -134,7 +134,7 @@ class DataLoader:
         # init_data["ratio_WT"] = {None: self._control['ratio_wt']}
         # init_data["ratio_WT_off"] = {None: self._control['ratio_wt_off']}
         init_data["hydrogen_import_share"] = {None: self._control['hydrogen_import_share']}
-        init_data["electricity_import_share"] = {None: self._control['electricity_import_share']}
+        # init_data["electricity_import_share"] = {None: self._control['electricity_import_share']}
 
         init_data['correction_wind'] = {None: 0.55}
 

@@ -17,7 +17,7 @@ def total_rule(M):
             + sum([M.eld[(t, 'pumped')] * M.cost[('pumped', 'variable_OM')] for t in M.t])
             - sum([M.eld[(t, 'National_Grid')] * M.cost[('National_Grid', 'variable_OM')] for t in M.t])
             + sum([M.elp[(t, 'National_Grid')] * M.cost[('National_Grid', 'variable_OM')] for t in M.t])
-            + sum(M.gasP[(t, 'H2_Grid')] for t in M.t)*200000  ### 20230412 수정
-            - sum(M.gas[(t, 'H2_Grid')] for t in M.t)*200000   ### 20230412 수정
+            + sum(M.gasP[(t, 'H2_Grid')] * M.cost[('H2_Grid', 'variable_OM')] for t in M.t)  ### 20230412 수정
+            - sum(M.gasG[(t, 'H2_Grid')] * M.cost[('H2_Grid', 'variable_OM')] for t in M.t)   ### 20230412 수정
             + sum([M.LNG[(t, tech)] * M.fossil[('NG', 'price')] for t in M.t for tech in M.tech])
             + (value(M.em) * M.fossil[('emission', 'price')]))

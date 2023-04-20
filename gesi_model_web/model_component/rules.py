@@ -83,6 +83,7 @@ def heat_ind_SOC_boundary_rule(M, t):
 def balance_gas_rule(M, t):
     return (
             sum([M.gas[(t, gas_all)] for gas_all in M.gas_all])
+            + M.gasG[(t, 'H2_Grid')]
             - sum([M.gasP[(t, RH2)] for RH2 in M.RH2])
             - sum([M.gasP[(t, P2G)] for P2G in M.P2G])
             - M.gasP[(t, 'H2_Grid')]
@@ -117,6 +118,11 @@ def gas_discharge_constraint_rule(M, t):
 # Conversion
 def gas_el_conversion_rule(M, t, P2G):
     return (M.gasP[(t, P2G)] - (M.specs[(P2G, 'eff_de')] * M.eld[(t, P2G)])) == 0
+
+# 20230414 수정: 전력을 과잉생산하여 수소 생산에 사용
+# def gas_el_conversion_rule1(M, t, P2G):
+    return (M.eld[(t, P2G)]) <= M.hourly_demand[t] * (1-M.electricity_import_share)
+
 
 def gas_fuel_conversion_rule(M, t, RH2):
     return (M.gasP[(t, RH2)] - (M.specs[(RH2, 'eff_de')] * M.eld[(t, RH2)])) == 0
@@ -360,7 +366,7 @@ def em_limit_rule(M):
 # Environmental Infra constraints
 def SMR_conversion_rule(M, t):
     ## 20230412 수정
-    return M.eld[(t, 'SMR')] <= value(M.Biogas_cap)/8760
+    return M.eld[(t, 'SMR')] <= (value(M.Biogas_cap)/8760 + value(M.Off_gas)/8760)
 
 def WtX_conversion_rule(M, t):
     ## 20230412 수정
@@ -374,13 +380,33 @@ def N_grid_rule(M, t):
 #    return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
 
 # using by hydrogen fuels = excel based constant
+
+
+#20230420 수정
+# def H_grid_rule1(M, t):
+    return M.gasG[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
+
 def H_grid_rule1(M, t):
-    return M.gas[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
-    
+    return M.gasP[(t, 'H2_Grid')] <= value(M.H_grid_cap)/8760
+
 ## 20230412 수정
-def H_grid_rule2(M, t):
-    return sum(M.gasP[(t,'H2_Grid')] for t in M.t) <=M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + sum(M.industry_gas[t] for t in M.t))
-    
+# def H_grid_rule2(M, t):
+    return sum(M.gasP[(t,'H2_Grid')] for t in M.t) <=M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + value(M.gas_D) * 1000000.)    
+
+## 20230419 수정
+def H_grid_rule2(M):
+    return (sum(M.gasP[(t,'H2_Grid')] for t in M.t) + sum(M.elp[(t, 'National_Grid')] for t in M.t)) == M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) 
+    + sum(M.industry_gas[t] for t in M.t)
+    + sum([M.elp[(t, power)] for power in M.power for t in M.t])
+      
+         # offshore wind + onshore wind + solar + ocean inflexible power
+    + sum(M.h_wind[t] * (M.New['Wind_on'] + M.specs[('Wind_on', 'cap')]) for t in M.t)
+    + sum(M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')]) for t in M.t)
+    + sum(M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')]) for t in M.t))
+    #return sum(M.gasP[(t,'H2_Grid')] for t in M.t) == M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + sum(M.industry_gas[t] for t in M.t))
+
+
+
 ## 20230412 수정
 #def H_grid_rule(M, t):
     #return M.gasP[(t, 'H2_Grid')] == (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))/8760
@@ -413,6 +439,7 @@ def curtailment_limit_rule(M, t):
 # Newly Added
 def new_added_constraints_rule(M, Upperlimit):
     return M.New[Upperlimit] <= M.Potential[Upperlimit]
+
 
 def EV_daily_rule(M, d):
     # return sum([M.eld[(t, 'EV')] for t in M.t if M.day[t] == d]) >= (

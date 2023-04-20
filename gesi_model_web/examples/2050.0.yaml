@@ -1,0 +1,31 @@
+# ==========================================================
+# = Solver Results                                         =
+# ==========================================================
+# ----------------------------------------------------------
+#   Problem Information
+# ----------------------------------------------------------
+Problem: 
+- Name: tmppzpu7vrh
+  Lower bound: 77719651928.84091
+  Upper bound: 77719651928.84091
+  Number of objectives: 1
+  Number of constraints: 447199
+  Number of variables: 551901
+  Number of nonzeros: 1468821
+  Sense: minimize
+# ----------------------------------------------------------
+#   Solver Information
+# ----------------------------------------------------------
+Solver: 
+- Status: ok
+  User time: 14.81
+  Termination condition: optimal
+  Termination message: Dual simplex - Optimal\x3a Objective = 7.7719651929e+10
+  Error rc: 0
+  Time: 18.04071831703186
+# ----------------------------------------------------------
+#   Solution Information
+# ----------------------------------------------------------
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0

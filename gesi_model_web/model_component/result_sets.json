@@ -23,7 +23,8 @@
         "pumped_soc",
         "battery_soc",
         "LNG",
-        "NG_consumption"
+        "LNG_PP",
+        "LNG_CHP"
     ],
     "H_representation": [
         "heat_demand",
