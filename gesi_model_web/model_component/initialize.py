@@ -134,7 +134,7 @@ def init_hourly_capacity_EV(M, t):
 def init_industry_gas(M, t):
     return value(M.gas_D) * 1000000. / 8760.
 
-def init_Off_gas(M, t):
+# def init_Off_gas(M, t):
     return value(M.Off_gas) / 8760.
 
 def init_E_heat_fixed(M, t):

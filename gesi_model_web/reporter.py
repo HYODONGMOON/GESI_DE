@@ -8,7 +8,7 @@ from gesi_model_web.core.logger import Logger
 
 class Reporter:
     def __init__(self, configuration, data, logger):
-        self._result_path = configuration.result_path
+        self._result_path = os.path.dirname(configuration.data_path)
         self._data = data
         self._graph_data = dict()
         self._logger = Logger(self.__class__.__name__, logger)
@@ -111,23 +111,19 @@ class Reporter:
         sum_pv = 0
         sum_wt = 0
         sum_Waste = 0
-        sum_pp = 0
+        sum_PP = 0
         sum_chp = 0
         sum_fcell = 0
         sum_battery_out = 0
-        sum_pumped_out = 0
         sum_p2h = 0
         sum_battery_in = 0
-        sum_pumped_in = 0
         sum_e_boiler = 0
         sum_dh_boiler = 0
         sum_ev = 0
         sum_electrolysis = 0
         sum_curtail = 0
-        sum_pumped_soc = 0
         sum_battery_soc = 0
         sum_lng = 0
-        sum_LNG_PP = 0
         sum_LNG_CHP = 0
         sum_SMR = 0
         sum_National_Grid_in = 0
@@ -152,7 +148,7 @@ class Reporter:
             sum_pv += pv
 
             wt = value(instance.h_wind[t] * (instance.specs[('Wind_on', 'cap')] + instance.New['Wind_on'])
-                       + instance.offshore[t] * (instance.specs[('Wind_off', 'cap')] + instance.New['Wind_off']))
+                       + (1 - value(instance.Dedicated)) * instance.offshore[t] * (instance.specs[('Wind_off', 'cap')] + instance.New['Wind_off']))
             rep['WT'].append(wt)
             graph_data['WT'][t] = wt
             sum_wt += wt
@@ -163,7 +159,7 @@ class Reporter:
 
             rep['PP'].append(value(instance.elp[(t, 'PP')]))
             graph_data['PP'][t] = value(instance.elp[(t, 'PP')])
-            sum_pp += value(instance.elp[(t, 'PP')])
+            sum_PP += value(instance.elp[(t, 'PP')])
 
             rep['CHP'].append(value(instance.elp[(t, 'CHP')]))
             graph_data['CHP'][t] = value(instance.elp[(t, 'CHP')])
@@ -173,21 +169,14 @@ class Reporter:
             graph_data['Fcell'][t] = value(instance.elp[(t, 'Fcell')])
             sum_fcell += value(instance.elp[(t, 'Fcell')])
 
-            rep['LNG_PP'].append(value(instance.LNG[(t, 'PP')]))
-            graph_data['LNG_PP'][t] = value(instance.LNG[(t, 'PP')])
-            sum_fcell += value(instance.LNG[(t, 'PP')])
-
+            
             rep['LNG_CHP'].append(value(instance.LNG[(t, 'CHP')]))
             graph_data['LNG_CHP'][t] = value(instance.LNG[(t, 'CHP')])
-            sum_fcell += value(instance.LNG[(t, 'CHP')])
+            sum_LNG_CHP += value(instance.LNG[(t, 'CHP')])
 
             rep['battery_out'].append(value(instance.elp[(t, 'b_interface')]))
             graph_data['battery_out'][t] = value(instance.elp[(t, 'b_interface')])
             sum_battery_out += value(instance.elp[(t, 'b_interface')])
-
-            rep['pumped_out'].append(value(instance.elp[(t, 'pumped')]))
-            graph_data['pumped_out'][t] = value(instance.elp[(t, 'pumped')])
-            sum_pumped_out += value(instance.elp[(t, 'pumped')])
 
             p2h = value(instance.eld[(t, 'DH_HP')] + instance.E_H_ind[t])
             rep['P2H'].append(p2h)
@@ -197,10 +186,6 @@ class Reporter:
             rep['battery_in'].append(value(instance.eld[(t, 'b_interface')]))
             graph_data['battery_in'][t] = value(instance.eld[(t, 'b_interface')])
             sum_battery_in += value(instance.eld[(t, 'b_interface')])
-
-            rep['pumped_in'].append(value(instance.eld[(t, 'pumped')]))
-            graph_data['pumped_in'][t] = value(instance.eld[(t, 'pumped')])
-            sum_pumped_in += value(instance.eld[(t, 'pumped')])
 
             rep['E_boiler'].append(value(instance.eld[(t, 'E_boiler')]))
             graph_data['E_boiler'][t] = value(instance.eld[(t, 'E_boiler')])
@@ -222,10 +207,6 @@ class Reporter:
             rep['curtail'].append(value(instance.curtail[t]))
             graph_data['curtail'][t] = value(instance.curtail[t])
             sum_curtail += value(instance.curtail[t])
-
-            rep['pumped_soc'].append(value(instance.SOC[t]))
-            graph_data['pumped_soc'][t] = value(instance.SOC[t])
-            sum_pumped_soc += value(instance.SOC[t])
 
             rep['battery_soc'].append(value(instance.SOC_battery[t]))
             graph_data['battery_soc'][t] = value(instance.SOC_battery[t])
@@ -257,14 +238,12 @@ class Reporter:
         rep['PV'].append(sum_pv)
         rep['WT'].append(sum_wt)
         rep['Waste'].append(sum_Waste)
-        rep['PP'].append(sum_pp)
+        rep['PP'].append(sum_PP)
         rep['CHP'].append(sum_chp)
         rep['Fcell'].append(sum_fcell)
         rep['battery_out'].append(sum_battery_out)
-        rep['pumped_out'].append(sum_pumped_out)
         rep['P2H'].append(sum_p2h)
         rep['battery_in'].append(sum_battery_in)
-        rep['pumped_in'].append(sum_pumped_in)
         rep['E_boiler'].append(sum_e_boiler)
         rep['DH_Boiler'].append(sum_dh_boiler)
         rep['EV'].append(sum_ev)
@@ -273,24 +252,20 @@ class Reporter:
         rep['National_Grid_in'].append(sum_National_Grid_in)
         rep['National_Grid_out'].append(sum_National_Grid_out)
         rep['curtail'].append(sum_curtail)
-        rep['pumped_soc'].append(sum_pumped_soc)
         rep['battery_soc'].append(sum_battery_soc)
         rep['LNG'].append(sum_lng)
-        rep['LNG_PP'].append(sum_LNG_PP)
         rep['LNG_CHP'].append(sum_LNG_CHP)
 
         graph_data['el_demand']['total'] = sum_el_demand
         graph_data['PV']['total'] = sum_pv
         graph_data['WT']['total'] = sum_wt
         graph_data['Waste']['total'] = sum_Waste
-        graph_data['PP']['total'] = sum_pp
+        graph_data['PP']['total'] = sum_PP
         graph_data['CHP']['total'] = sum_chp
         graph_data['Fcell']['total'] = sum_fcell
         graph_data['battery_out']['total'] = sum_battery_out
-        graph_data['pumped_out']['total'] = sum_pumped_out
         graph_data['P2H']['total'] = sum_p2h
         graph_data['battery_in']['total'] = sum_battery_in
-        graph_data['pumped_in']['total'] = sum_pumped_in
         graph_data['E_boiler']['total'] = sum_e_boiler
         graph_data['DH_Boiler']['total'] = sum_dh_boiler
         graph_data['EV']['total'] = sum_ev
@@ -299,10 +274,8 @@ class Reporter:
         graph_data['National_Grid_in']['total'] = sum_National_Grid_in
         graph_data['National_Grid_out']['total'] = sum_National_Grid_out
         graph_data['curtail']['total'] = sum_curtail
-        graph_data['pumped_soc']['total'] = sum_pumped_soc
         graph_data['battery_soc']['total'] = sum_battery_soc
         graph_data['LNG']['total'] = sum_lng
-        graph_data['LNG_PP']['total'] = sum_LNG_PP 
         graph_data['LNG_CHP']['total'] = sum_LNG_CHP 
 
         self._graph_data['rep'] = graph_data
@@ -319,9 +292,11 @@ class Reporter:
 
         sum_heat_demand = 0
         sum_chp_h = 0
+        sum_PP_h = 0
         sum_Waste_h = 0
         sum_fcell_h = 0
         sum_dh_hp_h = 0
+        sum_w_hp_h = 0
         sum_dh_boiler = 0
         sum_e_boiler_h = 0
         sum_soc_th = 0
@@ -337,6 +312,10 @@ class Reporter:
             graph_data['CHP_h'][t] = value(instance.heatP[(t, 'CHP')])
             sum_chp_h += value(instance.heatP[(t, 'CHP')])
 
+            rep_h['PP_h'].append(value(instance.heatP[(t, 'PP')]))
+            graph_data['PP_h'][t] = value(instance.heatP[(t, 'PP')])
+            sum_PP_h += value(instance.heatP[(t, 'PP')])
+
             rep_h['Waste_h'].append(value(instance.heatP[(t, 'Waste')]))
             graph_data['Waste_h'][t] = value(instance.heatP[(t, 'Waste')])
             sum_Waste_h += value(instance.heatP[(t, 'Waste')])
@@ -348,6 +327,10 @@ class Reporter:
             rep_h['DH_HP_h'].append(value(instance.heatP[(t, 'DH_HP')]))
             graph_data['DH_HP_h'][t] = value(instance.heatP[(t, 'DH_HP')])
             sum_dh_hp_h += value(instance.heatP[(t, 'DH_HP')])
+
+            rep_h['W_HP_h'].append(value(instance.heatP[(t, 'W_HP')]))
+            graph_data['W_HP_h'][t] = value(instance.heatP[(t, 'W_HP')])
+            sum_w_hp_h += value(instance.heatP[(t, 'W_HP')])
 
             rep_h['DH_Boiler'].append(value(instance.heatP[(t, 'DH_Boiler')]))
             graph_data['DH_Boiler'][t] = value(instance.heatP[(t, 'DH_Boiler')])
@@ -371,9 +354,11 @@ class Reporter:
 
         rep_h['heat_demand'].append(sum_heat_demand)
         rep_h['CHP_h'].append(sum_chp_h)
+        rep_h['PP_h'].append(sum_PP_h)
         rep_h['Waste_h'].append(sum_Waste_h)
         rep_h['Fcell_h'].append(sum_fcell_h)
         rep_h['DH_HP_h'].append(sum_dh_hp_h)
+        rep_h['W_HP_h'].append(sum_w_hp_h)
         rep_h['DH_Boiler'].append(sum_dh_boiler)
         rep_h['E_boiler_h'].append(sum_e_boiler_h)
         rep_h['SOC_th'].append(sum_soc_th)
@@ -382,9 +367,11 @@ class Reporter:
 
         graph_data['heat_demand']['total'] = sum_heat_demand
         graph_data['CHP_h']['total'] = sum_chp_h
+        graph_data['PP_h']['total'] = sum_PP_h
         graph_data['Waste_h']['total'] = sum_Waste_h
         graph_data['Fcell_h']['total'] = sum_fcell_h
         graph_data['DH_HP_h']['total'] = sum_dh_hp_h
+        graph_data['W_HP_h']['total'] = sum_w_hp_h
         graph_data['DH_Boiler']['total'] = sum_dh_boiler
         graph_data['E_boiler_h']['total'] = sum_e_boiler_h
         graph_data['SOC_th']['total'] = sum_soc_th
@@ -408,7 +395,7 @@ class Reporter:
         sum_SMR = 0
         sum_chp = 0
         sum_fcell = 0
-        sum_pp = 0
+        sum_PP = 0
         sum_gas_charging = 0
         sum_gas_discharging = 0
         sum_H2_grid_in = 0
@@ -446,7 +433,7 @@ class Reporter:
 
             rep_g['PP'].append(value(instance.gas[(t, 'PP')]))
             graph_data['PP'][t] = value(instance.gas[(t, 'PP')])
-            sum_pp += value(instance.gas[(t, 'PP')])
+            sum_PP += value(instance.gas[(t, 'PP')])
 
             rep_g['gas_charging'].append(value(instance.ch_gas[t]))
             graph_data['gas_charging'][t] = value(instance.ch_gas[t])
@@ -478,7 +465,7 @@ class Reporter:
         rep_g['SMR'].append(sum_SMR)
         rep_g['CHP'].append(sum_chp)
         rep_g['Fcell'].append(sum_fcell)
-        rep_g['PP'].append(sum_pp)
+        rep_g['PP'].append(sum_PP)
         rep_g['gas_charging'].append(sum_gas_charging)
         rep_g['gas_discharging'].append(sum_gas_discharging)
         rep_g['gas_SOC'].append(sum_gas_soc)
@@ -491,7 +478,7 @@ class Reporter:
         graph_data['SMR']['total'] = sum_SMR
         graph_data['CHP']['total'] = sum_chp
         graph_data['Fcell']['total'] = sum_fcell
-        graph_data['PP']['total'] = sum_pp
+        graph_data['PP']['total'] = sum_PP
         graph_data['gas_charging']['total'] = sum_gas_charging
         graph_data['gas_discharging']['total'] = sum_gas_discharging
         graph_data['gas_SOC']['total'] = sum_gas_soc
@@ -508,6 +495,10 @@ class Reporter:
 
         for expand in instance.expand:
             new_invest[expand] = value(instance.New[expand])
+
+        # Fcell 설비용량 디버그 출력문 추가
+        if expand[0] == 'Fcell':
+            print(f"Fcell 설비용량, 시간: {expand[1]}, 값: {value(instance.New[expand])}")
 
         self._graph_data['new_invest'] = new_invest
 
@@ -609,7 +600,6 @@ class Reporter:
                 + sum([instance.eld[(t, 'electrolysis')] * instance.cost[('electrolysis', 'variable_OM')] for t in instance.t])
                 + sum([instance.eld[(t, 'SMR')] * instance.cost[('SMR', 'variable_OM')] for t in instance.t])
                 + sum([instance.eld[(t, 'National_Grid')] * instance.cost[('National_Grid', 'variable_OM')] for t in instance.t])
-                + sum([instance.eld[(t, 'pumped')] * instance.cost[('pumped', 'variable_OM')] for t in instance.t])
         )
         rep_economic['v_operation'] = value(v_operation)
 
@@ -627,7 +617,6 @@ class Reporter:
         return rep_economic
 
     def report_facility_configuration(self):
-        pumped = 0
         
         facility_configuration = {
             'Wind_on': self._graph_data['new_invest']['Wind_on'],
@@ -645,7 +634,6 @@ class Reporter:
             'Gas_interface': self._graph_data['new_invest']['GS_interface'],
             'b_interface': self._graph_data['new_invest']['b_interface'],
             # 'pumped': self._data['specs_extended'].loc['pumped']['Final'] + self._graph_data['new_invest']['pumped'],
-            'pumped': pumped,
             'TES_DH': self._graph_data['new_invest']['TES_DH'],
             'Gas_storage': self._graph_data['new_invest']['Gas_storage'],
             'Battery': self._graph_data['new_invest']['battery'],

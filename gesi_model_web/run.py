@@ -24,7 +24,7 @@ class ModelExecutor:
         self.tag = 'RunScript'
 
         self.save_result = kwargs.pop('save_result', True)
-        self.solver = kwargs.pop('solver', 'cplex')
+        self.solver = kwargs.pop('solver', 'glgpk')
         self.verbose = kwargs.pop('verbose', 1)
 
         # For Macro Execution

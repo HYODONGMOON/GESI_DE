@@ -36,8 +36,6 @@ def define_set(M):
     M.P2P = Set(within=M.tech, doc='electricity production from electricity storage')
     M.F2H = Set(within=M.tech, doc='heat production from fuel')
     M.G2H = Set(within=M.tech, doc='heat production from gas')
-    M.W2P = Set(within=M.tech, doc='electricity production from waste')
-    M.W2H = Set(within=M.tech, doc='heat production from waste')
     M.flexible = Set(within=M.tech, doc='storage technologies')
     M.flexible_ex = Set(within=M.tech, doc='flexible technologies')
     M.flexible_stay = Set(within=M.tech, doc='flexible technologies stay')
@@ -92,16 +90,20 @@ def define_parameter(M):
     M.N_grid_cap = Param()
     M.H_grid_cap = Param()
     M.Off_gas = Param()    
+    M.W_heat = Param()
 
     # M.ratio_PV = Param()
     # M.ratio_WT = Param()
     # M.ratio_WT_off = Param()
     M.hydrogen_import_share = Param()
     # M.electricity_import_share = Param()
+    # M.fuelcell = Param()
 
     M.sum_demand = Param(initialize=init_sum_demand, doc='demand summation')
     M.sum_H_demand = Param(initialize=init_sum_H_demand, doc='heat demand summation')
     M.sum_T_demand = Param(initialize=init_sum_T_demand, doc='summation of inputdata demand')
+    
+
     M.max_wind = Param(initialize=init_max_wind, doc='max value in hourly wind profile')
     M.max_solar = Param(initialize=init_max_solar, doc='max value in hourl solar profile')
     M.h_demand = Param(M.t, initialize=init_h_demand, doc='hourly profile for electricity demand')
@@ -109,6 +111,7 @@ def define_parameter(M):
     M.h_wind = Param(M.t, initialize=init_h_wind, doc='hourly wind profile for caculation')
     M.h_solar = Param(M.t, initialize=init_h_solar, doc='hourl pv production profile for calculation')
     M.hourlytr = Param(M.t, initialize=init_hourlytr, doc='hourly transport demand profile')
+    
   
     M.correction_wind = Param()
     M.offshore = Param(M.t, initialize=init_offshore)
@@ -141,7 +144,7 @@ def define_parameter(M):
     M.hourly_capacity_EV = Param(M.t, initialize=init_hourly_capacity_EV)
 
     M.industry_gas = Param(M.t, initialize=init_industry_gas, doc="hourly industry gas demand")
-    M.hourly_Off_gas = Param(M.t, initialize=init_Off_gas)    
+    # M.hourly_Off_gas = Param(M.t, initialize=init_Off_gas)    
 
     # M.gas_S = Param(doc="Total Annual energy demand (TWh)")
 
@@ -153,7 +156,10 @@ def define_parameter(M):
                            doc="fixed heating demand by electricity COP assumed to be 3 (HP:80% and E_boiler:20%)")
     M.E_heat_smart = Param(M.t, initialize=init_E_heat_smart,
                            doc="smart heating demand by electricity COP assumed to be 3 (HP:80% and E_boiler:20%)")
-
+    
+    #해상풍력 수전해 직접 연결(dedicated)
+    M.Dedicated = Param()
+    M.export_h = Param()
 
     return M
 
@@ -178,7 +184,6 @@ def define_variable(M):
     M.dis_th = Var(M.t, within=NonNegativeReals, doc="hourly discharging thermal energy from thermal storage", initialize=0.0)
     M.dis_gas = Var(M.t, within=NonNegativeReals, doc="hourly discharging gas amount from gas storage", initialize=0.0)
     M.curtail = Var(M.t, within=NonNegativeReals, doc="hourly curtailment amount", initialize=0.0)
-    # M.WasteP = Var(M.t, within=NonNegativeReals, doc="hourly W2Hydrogen amount", initialize=0.0)
 
     # M.elp1 = Var(M.t, M.tech, within=NonNegativeReals, doc="electricity production by technology", initialize=0.0)
     # M.heatP1 = Var(M.t, M.tech, within=NonNegativeReals, doc="heat production by technology", initialize=0.0)
@@ -187,13 +192,13 @@ def define_variable(M):
     M.fu = Var(M.t, M.tech, within=NonNegativeReals, doc="hourly fuel consumption", initialize=0.0)
     M.SOC = Var(M.t, within=NonNegativeReals, doc="storage level in pumped hydro dam", initialize=0.0)
     M.LNG = Var(M.t, M.tech, within=NonNegativeReals, doc="LNG consumption by plants", initialize=0.0)
-    M.Solidwaste = Var(M.t, M.tech, within=NonNegativeReals, doc="consumption from plants", initialize=0.0)
     M.Biogas = Var(M.t, M.tech, within=NonNegativeReals, doc="consumption from plants", initialize=0.0)
     
+
     # M.gas = Var(M.t, M.tech, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
     M.gas = Var(M.t, M.gas_all, within=NonNegativeReals, doc="gas consumption by tech", initialize=0.0)
     M.gasP = Var(M.t, M.tech, within=NonNegativeReals, doc="gas production", initialize=0.0)
-    
+
     M.gasG = Var(M.t, M.G2G, within=NonNegativeReals, initialize=0.0)
     
     M.SOC_battery = Var(M.t, within=NonNegativeReals, initialize=0.0)
@@ -226,6 +231,7 @@ def define_constraints(M):
 
     # Conversion
     M.gas_el_conversion = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule, doc="hydrogen converted from electricity")
+    M.gas_el_conversion1 = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule1, doc="hydrogen converted from electricity")
     # M.gas_el_conversion1 = Constraint(M.t, M.P2G, rule=gas_el_conversion_rule1, doc="hydrogen converted from electricity")
     M.gas_fuel_conversion = Constraint(M.t, M.RH2, rule=gas_fuel_conversion_rule, doc="hydrogen converted by reforming other sources")
     M.EL_conversion = Constraint(M.t, M.F2P, rule=EL_conversion_rule,
@@ -236,9 +242,6 @@ def define_constraints(M):
     M.Heat_gas_conversion = Constraint(M.t, M.G2H, rule=Heat_gas_conversion_rule, doc="Heat converted from gas")
     M.Heat_el_conversion = Constraint(M.t, M.P2H, rule=Heat_el_conversion_rule, doc="Heat converted from electricity")
    
-    M.EL_waste_conversion = Constraint(M.t, M.W2P, rule=EL_waste_conversion_rule, doc="electricity conversion from solidwaste")
-    M.Heat_waste_conversion = Constraint(M.t, M.W2H, rule=Heat_waste_conversion_rule, doc="Heat converted from solidwaste")
-
 
     # EV related equations
     M.EV_battery_SOC = Constraint(M.t, rule=EV_battery_SOC_rule, doc="status of charge equation")
@@ -260,10 +263,7 @@ def define_constraints(M):
                                  doc="capacity constraints for electricity consumption technologies (expansion)")
     M.capacity_heatP = Constraint(M.t, M.F2H, rule=capacity_heatP_rule,
                                   doc="capacity constraint for heating from fuels")
-    # M.capacity_heatP1 = Constraint(M.t, M.P2H, rule=capacity_heatP1_rule,
-    #                                doc="capacity constraint for heating from electricity")
-    # M.capacity_heatP2 = Constraint(M.t, M.G2H, rule=capacity_heatP2_rule,
-    #                                doc="capacity constraint for heating from gas")
+
 
     # Storage Constraints
     M.storage_gas_constraint = Constraint(M.t, rule=storage_gas_constraint_rule,
@@ -272,8 +272,7 @@ def define_constraints(M):
                                              doc="capacity constraint for pumped hydro dam")
     M.storage_thermal_constraint = Constraint(M.t, rule=storage_thermal_constraint_rule,
                                               doc="capacity constraint for thermal storage capacity")
-    # M.heat_ind_SOC_cap = Constraint(M.t, rule=heat_ind_SOC_cap_rule,
-    #                                 doc="capacity constraint for individual heat storage capacity")
+
 
     # Pumped hydro equations
     M.hydro_soc_boundary = Constraint(M.t, rule=hydro_soc_boundary_rule,
@@ -314,23 +313,24 @@ def define_constraints(M):
     # Curtailment limit
     M.curtail_limit = Constraint(M.t, rule=curtailment_limit_rule)
     M.SMR_conversion = Constraint(M.t, rule=SMR_conversion_rule)
-    M.WtX_conversion_rule = Constraint(M.t, rule=WtX_conversion_rule)
-    M.N_grid_rule = Constraint(M.t, rule=N_grid_rule)
-    ## 20230412 수정
-#    M.N_grid_rule1 = Constraint(M.t, rule=N_grid_rule1)
-    ## 20230412 수정
-#    M.H_grid_rule = Constraint(M.t, rule=H_grid_rule)
-    M.H_grid_rule1 = Constraint(M.t, rule=H_grid_rule1)
-    M.H_grid_rule2 = Constraint(rule=H_grid_rule2)
-    
-    # binary_charge_rule
-    # M.binary_H_grid_ch_rule = Constraint(M.t, rule=binary_H_grid_ch_rule)
-    # M.binary_H_grid_dch_rule = Constraint(M.t, rule=binary_H_grid_dch_rule)
-    # M.binary_H_grid_decision_rule = Constraint(M.t, rule=binary_H_grid_decision_rule)
+    M.SMR_conversion1 = Constraint(M.t, rule=SMR_conversion_rule1)
+    # M.SMR_conversion2 = Constraint(rule=SMR_conversion_rule2)
 
-    # M.binary_charge_rule = Constraint(M.t, rule=binary_charge_rule)
-    # M.binary_discharge_rule = Constraint(M.t, rule=binary_discharge_rule)
-    # M.binary_decision_rule = Constraint(M.t, rule=binary_decision_rule)
+    M.WtX_conversion = Constraint(M.t, rule=WtX_conversion_rule)
+    # M.WtX_conversion1 = Constraint(rule=WtX_conversion_rule1)    
+    # M.N_grid_rule = Constraint(M.t, rule=N_grid_rule) #항만연계형 분석시 외부전력 수입량은 전력수요의 10%로 제한
+    M.H_grid_r1 = Constraint(M.t, rule=H_grid_rule1) #항만연계형 분석시 해외 수소수입량 일정
+    # M.H_grid_r2 = Constraint(rule=H_grid_rule2) #항만연계형 분석시 비활성화
+    # M.H_grid_r3 = Constraint(M.t, rule=H_grid_rule3)
+    # M.H_grid_r4 = Constraint(M.t, rule=H_grid_rule4)
+    # M.H_grid_r5 = Constraint(M.t, rule=H_grid_rule5)
+    # M.H_grid_r6 = Constraint(rule=H_grid_rule6)
+
+    M.Waste_heat = Constraint(M.t, rule=Waste_heat_rule)
+    # M.Waste_heat2 = Constraint(rule=Waste_heat_rule2)
+    M.W_heat_rule = Constraint(M.t, rule=W_heat_rule)
+    # M.Fcell_limit = Constraint(M.t, rule = Fcell_limit_rule)
+    M.PP_limit = Constraint(M.t, rule = PP_limit_rule)
 
     return M
 

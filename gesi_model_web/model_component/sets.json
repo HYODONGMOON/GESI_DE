@@ -8772,7 +8772,8 @@
         "H_demand",
         "wind",
         "solar",
-        "T_demand"        
+        "T_demand"
+               
     ],
     
     "tech": [
@@ -8796,7 +8797,8 @@
         "GS_interface",
         "SMR",
         "National_Grid",
-        "H2_Grid"
+        "H2_Grid",
+        "W_HP"
     ],
 
     "f_tech": [
@@ -8820,7 +8822,8 @@
         "GS_interface",
         "SMR",
         "National_Grid",
-        "H2_Grid"
+        "H2_Grid",
+        "W_HP"
     ],
 
     "power": [
@@ -8847,20 +8850,13 @@
     ],
     
     "F2P": [
-        "PP",
-        "CHP"
+        "CHP",
+        "PP"
     ],
     
-    "W2P": [
-        "Waste"
-    ],
-    
-    "W2H": [
-        "Waste"
-    ],
-
     "G2P": [
         "Fcell"
+        
     ],
 
     "P2P": [
@@ -8872,11 +8868,13 @@
 
     "F2H": [
         "DH_Boiler",
-        "CHP"
+        "CHP",
+        "PP"
     ],
 
     "G2H": [
         "Fcell"
+        
     ],
 
     "P2H": [
@@ -8887,7 +8885,7 @@
     "RH2": [
         "SMR" 
     ],
-    
+  
     "P2G": [
         "electrolysis"
     ],
@@ -8906,7 +8904,8 @@
         "EV",
         "SMR",
         "National_Grid",
-        "H2_Grid"
+        "H2_Grid",
+        "W_HP"
     ],
 
     "flexible_stay": [
@@ -8921,7 +8920,8 @@
         "b_interface",
         "SMR",
         "National_Grid",
-        "H2_Grid"
+        "H2_Grid",
+        "W_HP"
     ],
 
     "thermal": [
@@ -8951,7 +8951,8 @@
         "National_Grid",
         "Waste",
         "H2_Grid",
-        "Fcell"
+        "Fcell",
+        "W_HP"
     ],
  
     "RE": [
@@ -8971,7 +8972,8 @@
         "electrolysis",
         "battery",
         "GS_interface",
-        "PP"
+        "PP",
+        "H2_Grid"
     ],
     
     "trait": [

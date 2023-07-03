@@ -144,12 +144,12 @@ class DataLoader:
         EL = df_Demand.loc['electricity'][0]
         H = df_Demand.loc['heat'][0]
         gas_D = df_Demand.loc['hydrogen'][0]
-        gas_S = df_Demand.loc['H_s'][0]
+        # fuelcell = df_Demand.loc['fuelcell'][0]
        
         init_data['EL'] = {None: EL}
         init_data['H'] = {None: H}
         init_data['gas_D'] = {None: gas_D}
-        init_data['gas_S'] = {None: gas_S}
+        # init_data['fuelcell'] = {None: fuelcell}
 
         df_General = self.extract_General()
 
@@ -166,6 +166,13 @@ class DataLoader:
         init_data['el_h_old'] = {None: el_h_old}
         init_data['smart_share'] = {None: smart_share}
 
+        df_Others = self.extract_Others()
+
+        Dedicated = df_Others.loc['Dedicated'][0]
+        init_data['Dedicated'] = {None: Dedicated}
+
+        export_h = df_Others.loc['export_h'][0]
+        init_data['export_h'] = {None: export_h}
 
         df_Transportation = self.extract_Transportation()
         
@@ -194,6 +201,7 @@ class DataLoader:
         N_grid_cap = df_Cap.loc['N_grid_cap'][0]
         H_grid_cap = df_Cap.loc['H_grid_cap'][0]      
         Off_gas = df_Cap.loc['Off_gas'][0]      
+        W_heat = df_Cap.loc['W_heat'][0]      
 
         init_data["em_cap"] = {None: em_cap}
         init_data["Solidwaste_cap"] = {None: Solidwaste_cap}
@@ -201,6 +209,7 @@ class DataLoader:
         init_data["N_grid_cap"] = {None: N_grid_cap}
         init_data["H_grid_cap"] = {None: H_grid_cap}
         init_data["Off_gas"] = {None: Off_gas}
+        init_data["W_heat"] = {None: W_heat}
 
         self._data = {None: init_data}
 
@@ -245,13 +254,13 @@ class DataLoader:
         return df
 
     def extract_Distributions(self):
-        return self.extract_table('Hourly', 'A:f', 8760)
+        return self.extract_table('Hourly', 'A:h', 8760)               # 변수추가 망비용추가
 
     def extract_cost(self):
-        return self.extract_table('ES', 'J:N', 21)
+        return self.extract_table('ES', 'J:N', 22)
 
     def extract_specs(self):
-        return self.extract_table('ES', 'A:h', 21)
+        return self.extract_table('ES', 'A:h', 22)
 
     def extract_General(self):
         return self.extract_table('Inputdata', 'A:B', 2)
@@ -260,10 +269,13 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:C', 13, 7)
 
     def extract_Cap(self):
-        return self.extract_partial_table('Inputdata', 'A:B', 22, 6)
+        return self.extract_partial_table('Inputdata', 'A:B', 22, 7)
     
     def extract_Building(self):
-        return self.extract_partial_table('Inputdata', 'A:B', 30, 3)
+        return self.extract_partial_table('Inputdata', 'A:B', 31, 3)
+    
+    def extract_Others(self):
+        return self.extract_partial_table('Inputdata', 'A:B', 36, 2)
 
     def extract_Demand(self):
         return self.extract_table('Demand', 'H:I', 9)
@@ -272,4 +284,4 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:B', 4, 7)
 
     def extract_Potential(self):
-        return self.extract_partial_table('ES', 'A:B', 24, 11)
+        return self.extract_partial_table('ES', 'A:B', 25, 12)

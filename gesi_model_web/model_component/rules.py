@@ -10,7 +10,7 @@ def balance_p_rule(M, t):
                     sum([M.elp[(t, power)] for power in M.power])
          # offshore wind + onshore wind + solar + ocean inflexible power
          + M.h_wind[t] * (M.New['Wind_on'] + M.specs[('Wind_on', 'cap')])
-         + M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')])
+         + (1 - value(M.Dedicated)) * M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')])
          + M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')])
          # Charge_Discharge_pumped hydro
          # -charge(t)+discharge(t)
@@ -29,6 +29,8 @@ def balance_th_rule(M, t):
                    - sum([M.heatP[(t, F2H)] for F2H in M.F2H])
                    - sum([M.heatP[(t, P2H)] for P2H in M.P2H])
                    - sum([M.heatP[(t, G2H)] for G2H in M.G2H])
+                   - M.heatP[(t, 'Waste')]
+                   - M.heatP[(t, 'W_HP')]
                    - M.dis_th[t]
                    + M.ch_th[t]) == - M.hourly_heat[t]
 
@@ -89,7 +91,7 @@ def balance_gas_rule(M, t):
             - M.gasP[(t, 'H2_Grid')]
             - M.dis_gas[t]
             + M.ch_gas[t] 
-            - M.hourly_Off_gas[t]) == - M.industry_gas[t]
+            ) == - M.industry_gas[t]
 
 
 # Gas Storage Balance
@@ -119,18 +121,11 @@ def gas_discharge_constraint_rule(M, t):
 def gas_el_conversion_rule(M, t, P2G):
     return (M.gasP[(t, P2G)] - (M.specs[(P2G, 'eff_de')] * M.eld[(t, P2G)])) == 0
 
-# 20230414 수정: 전력을 과잉생산하여 수소 생산에 사용
-# def gas_el_conversion_rule1(M, t, P2G):
-    return (M.eld[(t, P2G)]) <= M.hourly_demand[t] * (1-M.electricity_import_share)
-
+def gas_el_conversion_rule1(M, t, P2G):
+    return  value(M.Dedicated) * (M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')])) * M.specs[(P2G, 'eff_de')] <= (M.gasP[(t, P2G)])
 
 def gas_fuel_conversion_rule(M, t, RH2):
     return (M.gasP[(t, RH2)] - (M.specs[(RH2, 'eff_de')] * M.eld[(t, RH2)])) == 0
-
-
-    
-  # return (- (M.specs[('electrolysis', 'eff_de')] * M.eld[(t, 'electrolysis')]) - (M.specs[('SMR', 'eff_de')] * M.eld[(t, 'SMR')]) + M.gasP[t]) == 0
-
 
 def EL_conversion_rule(M, t, F2P):
     # return M.elp[(t, F2P)] == M.specs[(F2P, 'eff_pe')] * (M.gas[(t, F2P)] + M.LNG[(t, F2P)])
@@ -140,114 +135,83 @@ def EL_gas_conversion_rule(M, t, G2P):
     # return M.elp[(t, G2P)] == (M.specs[(G2P, 'eff_pe')] * M.gas[(t, G2P)])
     return (M.elp[(t, G2P)] - (M.specs[(G2P, 'eff_pe')] * M.gas[(t, G2P)])) == 0
 
-
 def Heat_fuel_conversion_rule(M, t, F2H):
     # return M.heatP[(t, F2H)] == M.specs[(F2H, 'eff_th')] * (M.gas[(t, F2H)] + M.LNG[(t, F2H)])
     return M.heatP[(t, F2H)] == M.specs[(F2H, 'eff_th')] * (M.gas[(t, F2H)] + M.LNG[(t, F2H)])
-
 
 def Heat_gas_conversion_rule(M, t, G2H):
     # return M.heatP[(t, G2H)] == (M.specs[(G2H, 'eff_th')] * M.gas[(t, G2H)])
     return M.heatP[(t, G2H)] == (M.specs[(G2H, 'eff_th')] * M.gas[(t, G2H)])
 
-
 def Heat_el_conversion_rule(M, t, P2H):
     # return M.heatP[(t, P2H)] == (M.specs[(P2H, 'eff_th')] * M.eld[(t, P2H)])
     return M.heatP[(t, P2H)] == (M.specs[(P2H, 'eff_th')] * M.eld[(t, P2H)])
-
-
-def EL_waste_conversion_rule(M, t, W2P):
-    return (M.elp[(t, W2P)] - M.specs[(W2P, 'eff_pe')] * (M.Solidwaste[(t, W2P)])) == 0
-
-def Heat_waste_conversion_rule(M, t, W2H):
-    return M.heatP[(t, W2H)] == M.specs[(W2H, 'eff_th')] * (M.Solidwaste[(t, W2H)])
-
-
-
 
 # Capacity Constraints
 def capacity_elp_rule(M, t, power_stay):
     return M.elp[(t, power_stay)] <= M.specs[(power_stay, 'cap')]
 
-
 # def capacity_elp1_rule(M, t, power_ex):
     # return M.elp[(t, power_ex)] <= (M.New[power_ex] + M.specs[(power_ex, 'cap')])
     return M.elp[(t, power_ex)] - M.New[power_ex] <= M.specs[(power_ex, 'cap')]
 
-
 def capacity_eld_rule(M, t, flexible_stay):
     return M.eld[(t, flexible_stay)] <= M.specs[(flexible_stay, 'cap')]
-
 
 def capacity_eld1_rule(M, t, flexible_ex):
     # return M.eld[(t, flexible_ex)] <= (M.New[flexible_ex] + M.specs[(flexible_ex, 'cap')])
     return M.eld[(t, flexible_ex)] - M.New[flexible_ex] <= M.specs[(flexible_ex, 'cap')]
-
 
 # Capacity for Heat
 def capacity_heatP_rule(M, t, F2H):
     # return M.heatP[(t, F2H)] <= (M.specs[(F2H, 'cap')] + M.New[F2H])
     return M.heatP[(t, F2H)] - M.New[F2H] <= M.specs[(F2H, 'cap')]
 
-
 # Storage Constraints
 def storage_pumped_constraint_rule(M, t):
     # return M.SOC[t] <= M.specs[('pumped', 'storage')]
     return M.SOC[t] <= M.specs[('pumped', 'storage')]
 
-
 def storage_thermal_constraint_rule(M, t):
     # return M.SOC_th[t] <= (M.New['TES_DH'] + M.specs[('TES_DH', 'cap')])
     return M.SOC_th[t] - M.New['TES_DH'] <= M.specs[('TES_DH', 'cap')]
 
-
 def storage_gas_constraint_rule(M, t):
     # return M.SOC_gas[t] <= (M.New['Gas_storage'] + M.specs[('Gas_storage', 'cap')])
     return M.SOC_gas[t] - M.New['Gas_storage'] <= M.specs[('Gas_storage', 'cap')]
-
 
 # EV Related Equations
 def EV_battery_SOC_rule(M, t):
     if t > 1:
         # return M.SOC_EV[t] == (M.SOC_EV[t - 1] + (0.9 * M.eld[(t - 1, 'EV')]) - M.el_g2v[t - 1])
         return - (0.9 * M.eld[(t - 1, 'EV')]) - M.SOC_EV[t - 1] + M.SOC_EV[t] == - M.el_g2v[t - 1]
-
     return Constraint.Skip
-
 
 def EV_SOC_cap_rule(M, t):
     return (0.1 * value(M.N_Evs) * value(M.bat_cap), M.SOC_EV[t], 0.9 * value(M.N_Evs) * value(M.bat_cap))
 
-
 def EV_charging_cap_rule(M, t):
     return M.eld[(t, 'EV')] <= M.hourly_capacity_EV[t]
-
 
 def EV_SOC_ini_rule(M, t):
     if t == 1:
         return M.SOC_EV[t] == (0.5 * value(M.N_Evs) * value(M.bat_cap))
-
     return Constraint.Skip
-
 
 def EV_SOC_end_rule(M, t):
     if t == 8760:
         return M.SOC_EV[t] >= (0.5 * value(M.N_Evs) * value(M.bat_cap))
-
     return Constraint.Skip
-
 
 def EV_daily_rule(M, d):
     # return sum([M.eld[(t, 'EV')] for t in M.t if M.day[t] == d]) >= (
     #             0.5 * sum([M.el_g2v[t] for t in M.t if M.day[t] == d]))
     return sum([M.eld[(t, 'EV')] for t in M.t if M.day[t] == d]) >= (0.5 * sum([M.el_g2v[t] for t in M.t if M.day[t] == d]))
 
-
 def EV_weekly_rule(M, w):
     # return sum([M.eld[(t, 'EV')] for t in M.t if M.week[t] == w]) >= (
     #             0.8 * sum([M.el_g2v[t] for t in M.t if M.week[t] == w]))
     return sum([M.eld[(t, 'EV')] for t in M.t if M.week[t] == w]) >= (0.8 * sum([M.el_g2v[t] for t in M.t if M.week[t] == w]))
-
 
 # Pumped Hydro Equations
 def hydro_soc_rule(M, t):
@@ -256,43 +220,18 @@ def hydro_soc_rule(M, t):
         #                     + (M.specs[('pumped', 'eff_de')] * M.eld[(t - 1, 'pumped')])
         #                     - (M.elp[(t - 1, 'pumped')] / M.specs[('pumped', 'eff_pe')]))
         return (M.elp[(t - 1, 'pumped')] / M.specs[('pumped', 'eff_pe')]) - (M.specs[('pumped', 'eff_de')] * M.eld[(t - 1, 'pumped')]) - M.SOC[t - 1] + M.SOC[t] == 0
-
     return Constraint.Skip
-
 
 def hydro_soc_boundary_rule(M, t):
     if t == 1 or t == 8760:
         return M.SOC[t] == (M.specs[('pumped', 'storage')] * 0.5)
-
     return Constraint.Skip
-
 
 def hydro_charge_rule(M, t):
     return M.eld[(t, 'pumped')] <= M.specs[('pumped', 'cap')]
 
-
 def hydro_discharge_rule(M, t):
     return M.elp[(t, 'pumped')] <= M.specs[('pumped', 'cap')]
-
-#New Equation
-# def ratio_PV_WT_off1_rule(M):
-    # return (value(M.ratio_PV) * sum([(M.h_wind[t] * (M.New['Wind_on'] + M.specs[('Wind_on', 'cap')])
-    #                                   + M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')])) for t in M.t])
-    #         == value(M.ratio_WT) * sum([M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')]) for t in M.t]))
-    # return (sum([(value(M.ratio_PV) * M.h_wind[t] * M.New['Wind_on']) + (value(M.ratio_PV) * M.offshore[t] * M.New['Wind_off']) - (value(M.ratio_WT) * M.h_solar[t] * M.New['PV']) for t in M.t])
-        # == sum([(value(M.ratio_WT) * M.h_solar[t] * M.specs[('PV', 'cap')]) - (value(M.ratio_PV) * M.h_wind[t] *  M.specs[('Wind_on', 'cap')]) - (value(M.ratio_PV) * M.offshore[t] * M.specs[('Wind_off', 'cap')]) for t in M.t]))
-    return sum([M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')]) for t in M.t])==M.ratio_PV*sum(M.offshore[t] * (M.New['Wind_off']+M.specs[('Wind_off', 'cap')])+M.h_wind[t]*(M.New['Wind_on']+M.specs[('Wind_on','cap')])
-      +M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')]) for t in M.t)
-
-# def ratio_PV_WT_off2_rule(M):
-    return sum(M.offshore[t] * (M.New['Wind_off']+M.specs[('Wind_off', 'cap')]) for t in M.t)==M.ratio_WT_off*sum(M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')])+M.h_wind[t]*(M.New['Wind_on']+M.specs[('Wind_on','cap')])
-      +M.offshore[t] * (M.New['Wind_off']+M.specs[('Wind_off', 'cap')]) for t in M.t)
-      
-# def ratio_PV_WT_off3_rule(M):
-    return sum(M.h_wind[t]*(M.New['Wind_on']+M.specs[('Wind_on','cap')]) for t in M.t)==M.ratio_WT*sum(M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')])+M.h_wind[t]*(M.New['Wind_on']+M.specs[('Wind_on','cap')])
-      +M.offshore[t] * (M.New['Wind_off']+M.specs[('Wind_off', 'cap')]) for t in M.t)
-    
-
 
 # Battery Equation
 def battery_SOC_rule(M, t):
@@ -300,132 +239,123 @@ def battery_SOC_rule(M, t):
         return M.SOC_battery[t] == (((1 - 0.0001) * M.SOC_battery[t - 1])
                                     + (M.specs[('battery', 'eff_de')] * M.eld[(t - 1, 'b_interface')])
                                     - (M.elp[(t - 1, 'b_interface')] / M.specs[('battery', 'eff_pe')]))
-
     return Constraint.Skip
-
 
 def battery_SOC_boundary_rule(M, t):
     if t == 1 or t == 8760:
         return M.SOC_battery[t] == ((M.New['battery'] + M.specs[('battery', 'cap')]) * 0.5)
-
     return Constraint.Skip
-
 
 def battery_charge_rule(M, t):
     return M.eld[(t, 'b_interface')] <= (M.New['b_interface'] + M.specs[('b_interface', 'cap')])
 
-
 def battery_discharge_rule(M, t):
     return M.elp[(t, 'b_interface')] <= (M.New['b_interface'] + M.specs[('b_interface', 'cap')])
 
-
 def battery_storage_cap_rule(M, t):
     return M.SOC_battery[t] <= (M.New['battery'] + M.specs['battery', 'cap'])
-
 
 def battery_power_energy_rule(M, t):
     return (M.New['b_interface'] + M.specs[('b_interface', 'cap')]) <= (
                 (M.New['battery'] + M.specs[('battery', 'cap')]) / 6.)
 
-## 20230412 수정
-#def binary_charge_rule(M, t):
-    # return M.eld[(t, 'b_interface')] / 10000000000 <= M.bi_battery_ch[t]
-    return M.eld[(t, 'b_interface')] <= M.bi_battery_ch[t]
-
-## 20230412 수정
-#def binary_discharge_rule(M, t):
-    # return M.elp[(t, 'b_interface')] / 10000000000 <= M.bi_battery_dis[t]
-    return M.elp[(t, 'b_interface')] <= M.bi_battery_dis[t]
-
-## 20230412 수정
-#def binary_decision_rule(M, t):
-    return M.bi_battery_ch[t] + M.bi_battery_dis[t] <= 1.5
-
-
 # Emission Constraints
 def em_amount_rule(M):
     return M.em == ((sum([M.LNG[(t, tech)] for t in M.t for tech in M.tech]) * M.fossil[('NG', 'em')]) 
                     +(sum([M.elp[t, 'National_Grid'] for t in M.t]) * M.fossil[('N_grid', 'em')]))
-                
-
 
 def em_limit_rule(M):
     # return M.em <= value(M.em_cap)
     ## 20230412 수정
     return M.em <= value(M.em_cap)
 
-
-# Biogas constraints
-# def Solidwaste_limit_rule(M, t):
-    return M.Solidwaste <= value(M.Solidwaste_cap)/8760
-
-# Newly Added
-# def WasteP_limit_rule(M, t):
-#     return M.WasteP[t] <= (M.Ncost[t] * (M.New['SMR'] + M.specs[('SMR', 'cap')]))
-
 # Environmental Infra constraints
+# SMR 가동 상하한 +-20%, 1년 발생량 충족하는 범위내에서 변동운영 가능
 def SMR_conversion_rule(M, t):
-    ## 20230412 수정
-    return M.eld[(t, 'SMR')] <= (value(M.Biogas_cap)/8760 + value(M.Off_gas)/8760)
+    ## 20230523 수정
+    return M.eld[(t, 'SMR')] <= (value(M.Biogas_cap)/8760 + value(M.Off_gas)/8760) * 1.2
 
+def SMR_conversion_rule1(M, t):
+    ## 20230523 수정
+    return M.eld[(t, 'SMR')] >= (value(M.Biogas_cap)/8760 + value(M.Off_gas)/8760) * 0.8
+
+# def SMR_conversion_rule2(M):
+    ## 20230523 수정
+    return sum(M.eld[(t, 'SMR')] for t in M.t) == (value(M.Biogas_cap)/8760 + value(M.Off_gas)/8760)
+
+# Waste 가동 상한 +-100%, 1년 발생량 충족하는 범위내에서 변동운영 가능
 def WtX_conversion_rule(M, t):
+    ## 20230524 수정
+    return M.elp[(t, 'Waste')] <= value(M.Solidwaste_cap)/8760/4 
+
+# def WtX_conversion_rule1(M):
     ## 20230412 수정
-    return M.elp[(t, 'Waste')] <= value(M.Solidwaste_cap)/8760/4
+    return sum(M.elp[(t,'Waste')] for t in M.t) == value(M.Solidwaste_cap)/4
 
-def N_grid_rule(M, t):
+
+def Waste_heat_rule(M, t):
+    ## 20230524 수정
+    return M.heatP[(t,'Waste')] <= value(M.Solidwaste_cap) /8760/4
+
+# def Waste_heat_rule2(M):
+    ## 20230524 수정
+    return sum(M.heatP[(t,'Waste')] for t in M.t) == value(M.Solidwaste_cap)/4 
+
+# def N_grid_rule(M, t):
     ##20230412 수정
-    return M.elp[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
-## 20230412 수정
-#def N_grid_rule1(M, t):
-#    return M.eld[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760
+    return M.elp[(t, 'National_Grid')] <= value(M.N_grid_cap)/8760  #항만연계형 사용
 
-# using by hydrogen fuels = excel based constant
+# def H_grid_rule3(M, t):
+    return M.gasP[(t, 'H2_Grid')] >= 0.5 * value(M.H_grid_cap)/8760
 
-
-#20230420 수정
-# def H_grid_rule1(M, t):
-    return M.gasG[(t, 'H2_Grid')] <= (M.New['H2_Grid'] + M.specs[('H2_Grid', 'cap')])
+# def H_grid_rule4(M, t):
+    return sum([M.gas[(t, gas_all)] for gas_all in M.gas_all]) * 0.1 <= sum(M.gas[(t, 'Fcell')] for t in M.t)
 
 def H_grid_rule1(M, t):
-    return M.gasP[(t, 'H2_Grid')] <= value(M.H_grid_cap)/8760
+    return M.gasP[(t, 'H2_Grid')] == value(M.H_grid_cap) #항만연계형 사용
 
-## 20230412 수정
-# def H_grid_rule2(M, t):
-    return sum(M.gasP[(t,'H2_Grid')] for t in M.t) <=M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + value(M.gas_D) * 1000000.)    
+# def H_grid_rule5(M, t):
+    return M.gasP[(t, 'H2_Grid')] == 0  #농어촌지역형 
 
-## 20230419 수정
-def H_grid_rule2(M):
-    return (sum(M.gasP[(t,'H2_Grid')] for t in M.t) + sum(M.elp[(t, 'National_Grid')] for t in M.t)) == M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) 
+# def H_grid_rule6(M):
+    return sum(M.gasG[(t, 'H2_Grid')] for t in M.t) == value(M.export_h) * (sum(M.gasG[(t,'H2_Grid')] for t in M.t) + sum(M.eld[(t, 'National_Grid')] for t in M.t)) #농어촌지역형 
+
+def W_heat_rule(M, t):
+    return M.heatP[(t, 'W_HP')] <= value(M.W_heat)/8760
+
+
+# def Fcell_limit_rule(M, t):
+    return M.elp[(t, 'Fcell')] >= M.specs[('Fcell', 'cap')] * M.specs[('Fcell', 'eff_pe')] *0.5      # 10MW,20MW capacity fcell 수요도시형, 200MW 산업중심형             #학회 300 600 1000
+
+
+def PP_limit_rule(M, t):
+    return M.elp[(t, 'PP')] <= 0.01      # PP 제약 
+ 
+
+
+## 20230524 수정
+# def H_grid_rule2(M):
+    return (sum(M.gasP[(t,'H2_Grid')] for t in M.t) + sum(M.elp[(t, 'National_Grid')] for t in M.t)) <= M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) 
+    + sum(M.hourly_demand[t] for t in M.t)
     + sum(M.industry_gas[t] for t in M.t)
-    + sum([M.elp[(t, power)] for power in M.power for t in M.t])
-      
-         # offshore wind + onshore wind + solar + ocean inflexible power
-    + sum(M.h_wind[t] * (M.New['Wind_on'] + M.specs[('Wind_on', 'cap')]) for t in M.t)
-    + sum(M.offshore[t] * (M.New['Wind_off'] + M.specs[('Wind_off', 'cap')]) for t in M.t)
-    + sum(M.h_solar[t] * (M.New['PV'] + M.specs[('PV', 'cap')]) for t in M.t))
-    #return sum(M.gasP[(t,'H2_Grid')] for t in M.t) == M.hydrogen_import_share*(sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) + sum(M.industry_gas[t] for t in M.t))
+    + sum(M.eld[(t,'DH_HP')] for t in M.t)
+    # + sum(M.eld[(t,'DH_Boiler')] for t in M.t)
+    + sum(M.eld[(t,'E_boiler')] for t in M.t))
+    #+ sum(M.heatP[(t,'CHP')] for t in M.t)
+    #+ sum(M.heatP[(t,'Fcell')] for t in M.t)
+    #+ sum(M.heatP[(t,'Waste')] for t in M.t)
+    #+ sum(M.heatP[(t,'Fcell')] for t in M.t)
+    #+ sum(M.heatP[(t,'W_HP')] for t in M.t))
 
-
-
-## 20230412 수정
-#def H_grid_rule(M, t):
-    #return M.gasP[(t, 'H2_Grid')] == (value(M.H_grid_cap)/8760 + value(M.gas_S) * (M.hydrogen_import_share))/8760
-
-# def binary_H_grid_ch_rule(M, t):
-    #return M.gas[(t, 'GS_interface')] <= M.bi_H_grid_ch[t]
-
-# def binary_H_grid_dch_rule(M, t):
-    #return M.gasP[(t, 'GS_interface')] <= M.bi_H_grid_dch[t]
-
-# def binary_H_grid_decision_rule(M, t):
-    #return M.bi_H_grid_ch[t] + M.bi_H_grid_dch[t] <= 1.5
+## 20230421 연료전지 수소소비량 지정 
+# def fuelcell_rule(M):
+    return sum([M.gas[(t, gas_all)] for t in M.t for gas_all in M.gas_all]) == value(M.fuelcell) 
 
 
 # National_Grid_in constraints
 # def National_Grid_limit_rule(M, t):
     # return sum(M.elp[t, 'National_Grid'] for t in M.t) <= (sum(M.hourly_demand[t] for t in M.t) * M.electricity_import_share)
     #return sum(M.elp[t, 'National_Grid'] for t in M.t) == (value(M.EL) * 1000000 * M.electricity_import_share) # 선언하는데 시간이 오래 걸림(180초 이상)
-    
 
 # Curtailment Limit
 def curtailment_limit_rule(M, t):
