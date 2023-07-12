@@ -1,0 +1,31 @@
+# ==========================================================
+# = Solver Results                                         =
+# ==========================================================
+# ----------------------------------------------------------
+#   Problem Information
+# ----------------------------------------------------------
+Problem: 
+- Name: tmpdnbnt9hj
+  Lower bound: 376398517322.68823
+  Upper bound: 376398517322.68823
+  Number of objectives: 1
+  Number of constraints: 490999
+  Number of variables: 578182
+  Number of nonzeros: 1503862
+  Sense: minimize
+# ----------------------------------------------------------
+#   Solver Information
+# ----------------------------------------------------------
+Solver: 
+- Status: ok
+  User time: 32.56
+  Termination condition: optimal
+  Termination message: Primal simplex - Optimal\x3a Objective = 3.7639851732e+11
+  Error rc: 0
+  Time: 36.089685678482056
+# ----------------------------------------------------------
+#   Solution Information
+# ----------------------------------------------------------
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0

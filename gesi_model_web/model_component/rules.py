@@ -1,5 +1,21 @@
 from pyomo.core import Constraint, value
+import sys
+import data_loader
 
+# data_loader.py의 값 불러오기
+
+data = data_loader.load_data()
+
+# 유형별 함수 적용
+
+def check_selection_rule(M, t):
+    if data['choice_city'] > 0:
+        return Fcell_limit_rule(M, t)
+    
+    # elif data['choice_industry'] > 0:
+        return M.elp[(t, 'Fcell')] >= M.specs[('Fcell', 'cap')] * M.specs[('Fcell', 'eff_pe')] * 1.5
+    else:
+        return None
 
 # from pyomo.core import Constraint
 
@@ -324,7 +340,7 @@ def W_heat_rule(M, t):
     return M.heatP[(t, 'W_HP')] <= value(M.W_heat)/8760
 
 
-# def Fcell_limit_rule(M, t):
+def Fcell_limit_rule(M, t):
     return M.elp[(t, 'Fcell')] >= M.specs[('Fcell', 'cap')] * M.specs[('Fcell', 'eff_pe')] *0.5      # 10MW,20MW capacity fcell 수요도시형, 200MW 산업중심형             #학회 300 600 1000
 
 

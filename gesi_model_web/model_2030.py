@@ -332,6 +332,10 @@ def define_constraints(M):
     # M.Fcell_limit = Constraint(M.t, rule = Fcell_limit_rule)
     M.PP_limit = Constraint(M.t, rule = PP_limit_rule)
 
+    M.check_selection = Constraint(M.t, rule=check_selection_rule)      # 유형별 함수 적용
+
+
+
     return M
 
 

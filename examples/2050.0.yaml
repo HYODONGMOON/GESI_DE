@@ -5,9 +5,9 @@
 #   Problem Information
 # ----------------------------------------------------------
 Problem: 
-- Name: tmpgs9ww_6j
-  Lower bound: 4285492450839.2446
-  Upper bound: 4285492450839.2446
+- Name: tmp3yll5_md
+  Lower bound: 470697732430.89703
+  Upper bound: 470697732430.89703
   Number of objectives: 1
   Number of constraints: 490999
   Number of variables: 578182
@@ -18,11 +18,11 @@ Problem:
 # ----------------------------------------------------------
 Solver: 
 - Status: ok
-  User time: 25.05
+  User time: 38.98
   Termination condition: optimal
-  Termination message: Primal simplex - Optimal\x3a Objective = 4.2854924508e+12
+  Termination message: Primal simplex - Optimal\x3a Objective = 4.7069773243e+11
   Error rc: 0
-  Time: 28.604823112487793
+  Time: 42.34627342224121
 # ----------------------------------------------------------
 #   Solution Information
 # ----------------------------------------------------------

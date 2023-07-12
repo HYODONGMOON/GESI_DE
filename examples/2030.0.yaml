@@ -1,0 +1,31 @@
+# ==========================================================
+# = Solver Results                                         =
+# ==========================================================
+# ----------------------------------------------------------
+#   Problem Information
+# ----------------------------------------------------------
+Problem: 
+- Name: tmprocq3mez
+  Lower bound: 378608650343.61005
+  Upper bound: 378608650343.61005
+  Number of objectives: 1
+  Number of constraints: 490999
+  Number of variables: 578182
+  Number of nonzeros: 1503862
+  Sense: minimize
+# ----------------------------------------------------------
+#   Solver Information
+# ----------------------------------------------------------
+Solver: 
+- Status: ok
+  User time: 32.3
+  Termination condition: optimal
+  Termination message: Dual simplex - Optimal\x3a Objective = 3.7860865034e+11
+  Error rc: 0
+  Time: 35.82468342781067
+# ----------------------------------------------------------
+#   Solution Information
+# ----------------------------------------------------------
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0

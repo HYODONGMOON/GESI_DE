@@ -156,6 +156,7 @@ class DataLoader:
         discount = df_General.loc['discount'][0]
         init_data['discount'] = {None: discount}
 
+        
         df_Building = self.extract_Building()
 
         el_h_new = df_Building.loc['el_h_new'][0]
@@ -166,13 +167,27 @@ class DataLoader:
         init_data['el_h_old'] = {None: el_h_old}
         init_data['smart_share'] = {None: smart_share}
 
-        df_Others = self.extract_Others()
+
+        df_Others = self.extract_Others()       # 유형 선택에 따라 다른 함수가 적용되도록 수정
 
         Dedicated = df_Others.loc['Dedicated'][0]
         init_data['Dedicated'] = {None: Dedicated}
 
         export_h = df_Others.loc['export_h'][0]
         init_data['export_h'] = {None: export_h}
+
+        choice_city = df_Others.loc['choice_city'][0]
+        init_data['choice_city'] = {None: choice_city}
+
+        choice_industry = df_Others.loc['choice_industry'][0]
+        init_data['choice_industry'] = {None: choice_industry}
+
+        choice_rural = df_Others.loc['choice_rural'][0]
+        init_data['choice_rural'] = {None: choice_rural}
+
+        choice_port = df_Others.loc['choice_port'][0]
+        init_data['choice_port'] = {None: choice_port}
+
 
         df_Transportation = self.extract_Transportation()
         
@@ -275,7 +290,7 @@ class DataLoader:
         return self.extract_partial_table('Inputdata', 'A:B', 31, 3)
     
     def extract_Others(self):
-        return self.extract_partial_table('Inputdata', 'A:B', 36, 2)
+        return self.extract_partial_table('Inputdata', 'A:B', 36, 6)
 
     def extract_Demand(self):
         return self.extract_table('Demand', 'H:I', 9)
